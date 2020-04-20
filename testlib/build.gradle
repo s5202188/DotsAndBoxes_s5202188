@@ -1,0 +1,39 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    api project(":lib")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.junit.jupiter:junit-jupiter:5.5.2"
+    implementation "org.junit.jupiter:junit-jupiter-params:5.5.2"
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
+
+repositories {
+    jcenter()
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = ['-XXLanguage:+InlineClasses']
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = ['-XXLanguage:+InlineClasses']
+    }
+}

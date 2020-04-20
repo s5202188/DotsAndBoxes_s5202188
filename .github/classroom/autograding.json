@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Gradle check logic",
+      "setup": "",
+      "run": "./gradlew :logic:check",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": null
+    }
+  ]
+}
