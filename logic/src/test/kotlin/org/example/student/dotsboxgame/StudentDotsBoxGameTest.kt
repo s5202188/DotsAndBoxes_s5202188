@@ -10,7 +10,7 @@ import uk.ac.bournemouth.ap.dotsandboxeslib.test.TestDotsAndBoxes
  */
 internal class StudentDotsBoxGameTest : TestDotsAndBoxes() {
     override fun createGame(columns: Int, rows: Int, players: List<Player>): DotsAndBoxesGame {
-        //return StudentDotsBoxGame(columns, rows, players)
-        return TODO("Create a game of your game type with the correct columns, rows and players")
+        return StudentDotsBoxGame(columns, rows, players)
+        //return TODO("Create a game of your game type with the correct columns, rows and players")
     }
 }
