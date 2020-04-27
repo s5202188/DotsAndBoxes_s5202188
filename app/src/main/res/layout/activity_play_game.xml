@@ -6,10 +6,10 @@
         android:layout_height="match_parent"
         tools:context="uk.ac.bournemouth.ap.dotsandboxes.PlayGameActivity">
 
-    <uk.ac.bournemouth.ap.dotsandboxes.CustView
+    <uk.ac.bournemouth.ap.dotsandboxes.GameView
             android:id="@+id/custView"
-            android:layout_width="299dp"
-            android:layout_height="383dp"
+            android:layout_width="375dp"
+            android:layout_height="379dp"
             android:layout_margin="5dp"
             android:background="#4CAF50"
             app:layout_constraintBottom_toBottomOf="parent"

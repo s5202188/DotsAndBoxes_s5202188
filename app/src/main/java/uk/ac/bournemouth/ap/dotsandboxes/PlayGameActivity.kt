@@ -12,4 +12,5 @@ class PlayGameActivity : AppCompatActivity() {
         supportActionBar!!.title = "Dots And Boxes"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
+
 }
