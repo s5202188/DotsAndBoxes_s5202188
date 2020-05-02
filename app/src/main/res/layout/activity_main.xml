@@ -4,6 +4,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#abcdef"
         tools:context=".MainActivity">
 
     <Button
@@ -11,7 +12,9 @@
             android:layout_width="296dp"
             android:layout_height="119dp"
             android:layout_marginTop="152dp"
+            android:background="@android:color/tertiary_text_light"
             android:text="Play Game"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -21,7 +24,9 @@
             android:layout_width="168dp"
             android:layout_height="88dp"
             android:layout_marginTop="100dp"
+            android:background="@android:color/tertiary_text_light"
             android:text="Settings"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"

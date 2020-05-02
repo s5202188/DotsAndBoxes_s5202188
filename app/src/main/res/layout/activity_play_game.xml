@@ -4,19 +4,21 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#abcdef"
         tools:context="uk.ac.bournemouth.ap.dotsandboxes.PlayGameActivity">
 
     <uk.ac.bournemouth.ap.dotsandboxes.GameView
             android:id="@+id/custView"
-            android:layout_width="375dp"
-            android:layout_height="379dp"
+            android:layout_width="376dp"
+            android:layout_height="517dp"
             android:layout_margin="5dp"
             android:background="#4CAF50"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.542"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.83" />
+            app:layout_constraintVertical_bias="0.168" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
