@@ -15,19 +15,7 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
     private var onGameChangeListener: DotsAndBoxesGame.GameChangeListener? = null
     private var onGameOverListeners: DotsAndBoxesGame.GameOverListener? = null
 
-    var linearray : MutableList<MutableList<Pair<Int, Int>>> = createDrawnLines()
-
     var playerScores = mutableListOf<Int>(0, 0)
-    /*
-    var playerScores = setPlayerScores()
-    private fun setPlayerScores(): MutableList<Int> {
-        val retVal = mutableListOf<Int>()
-        for (i in 0..players.size) {
-            retVal.add(0)
-        }
-        return retVal
-    }
-*/
 
     override val players: List<Player> = players
     //TODO("You will need to get players from your constructor")
@@ -58,10 +46,9 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
             current = currentPlayer
         }
     }
+
+
     init {
-        for(box in boxes) {
-            box.boundingLines
-        }
         playComputerTurns()
     }
 
@@ -129,10 +116,22 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
         override var owningPlayer: Player? = null
         //get() = TODO("Provide this getter. Note you can make it a var to do so")
 
-        override val boundingLines: MutableList<DotsAndBoxesGame.Line> = mutableListOf()
-        //override val boundingLines: Iterable<DotsAndBoxesGame.Line>
-            //get() = TODO("Look up the correct lines from the game outer class")
+        //override val boundingLines: MutableList<DotsAndBoxesGame.Line> = mutableListOf()
+        override val boundingLines: List<DotsAndBoxesGame.Line>
+        //get() = TODO("Look up the correct lines from the game outer class")
+            get() {
+            if ((this.boxX % 2 != 0) && (this.boxY % 2 != 0)) {
+                for (box in boxes) {
+                    boundingLines.add(lines[this.boxX, this.boxY + 1])
+                    boundingLines.add(lines[this.boxX + 1, this.boxY])
+                    boundingLines.add(lines[this.boxX, this.boxY - 1])
+                    boundingLines.add(lines[this.boxX - 1, this.boxY])
+                }
+            }
+            return boundingLines
+        }
 
+        /*
         fun setBoundingLines() {
             for(box in boxes) {
                 boundingLines.add(lines[this.boxX, this.boxY + 1])
@@ -141,7 +140,6 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
                 boundingLines.add(lines[this.boxX - 1, this.boxY])
             }
         }
-
         fun checkBoxLinesDrawn(): Boolean {
             if(boundingLines[0].isDrawn && boundingLines[1].isDrawn && boundingLines[2].isDrawn && boundingLines[3].isDrawn) {
                 this.owningPlayer = currentPlayer
@@ -150,30 +148,26 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
                 return false
             }
         }
+         */
 
-        private fun validBox(): Boolean {
-            return (this.boxX % 2 != 0) && (this.boxY % 2 != 0)
+        fun checkBoxLinesDrawn(): Boolean {
+            if(boundingLines[0].isDrawn && boundingLines[1].isDrawn && boundingLines[2].isDrawn && boundingLines[3].isDrawn) {
+                this.owningPlayer = currentPlayer
+                return true
+            }
+            return false
         }
     }
 
+
     class PlayerUser(player_Name: String) : HumanPlayer() {
-        private var pname = player_Name
-            get() {
-                return field
-            }
-            set(value) {
-                field = value
-            }
+        var name: String = "Player1"
+        init {name = player_Name}
     }
 
     class PlayerComputer(compName: String): ComputerPlayer() {
-        private var cname = compName
-            get() {
-                return field
-            }
-            set(value) {
-                field = value
-            }
+        var cname: String = "Computer"
+        init {cname = compName}
 
         override fun makeMove(game: DotsAndBoxesGame) {
             /*
@@ -193,29 +187,6 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
     }
 
 
-
-    private fun createDrawnLines(): MutableList<MutableList<Pair<Int, Int>>>{
-        val linesarray = mutableListOf<MutableList<Pair<Int, Int>>>()
-        //The array is filled with zeroes, indicating that none of the lines have been drawn yet
-        for(gridX in 0 until columns) {
-            val col = mutableListOf<Pair<Int, Int>>()
-            for (gridY in 0 until rows) {
-                //Line will only be added if it has valid coordinates
-                if(lines[gridX, gridY].validLine()) {
-                    col.add(Pair(gridX, gridY))
-                }
-            }
-            linesarray.add(col)
-        }
-        return linesarray
-    }
-
-
-
-
-
-
-
     fun setGameChangeListener(gameChangeListenerImp: DotsAndBoxesGame.GameChangeListener) {
         onGameChangeListener = gameChangeListenerImp
     }
@@ -233,6 +204,10 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
 
     fun playerDrawnBox() {
         playerScores[currentPlayerIndex] ++
+    }
+
+    fun getBoxOwner(boxCol: Int, boxRow: Int): Player? {
+        return boxes[boxCol, boxRow].owningPlayer
     }
 
     fun gameToken(tCol: Int, tRow: Int): Boolean {
@@ -267,15 +242,11 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
             currentPlayer = players[currentPlayerIndex]
             return true
         }
-
          */
         return false
     }
 
-
-    fun getBoxOwner(boxCol: Int, boxRow: Int): Player? {
-        return boxes[boxCol, boxRow].owningPlayer
-    }
-
+    private fun <T> Iterable<T>.add(t: T) {}
 
 }
+

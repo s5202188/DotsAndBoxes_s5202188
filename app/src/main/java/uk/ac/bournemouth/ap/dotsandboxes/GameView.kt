@@ -43,6 +43,8 @@ class GameView: View {
     private val colCount = 7
     private val rowCount = 7
 
+    var sep: Float = 0f
+
     //name values
     private val playerName = "Player1"
     private val compName = "Computer"
@@ -53,7 +55,7 @@ class GameView: View {
     private val myGestureDetector = GestureDetector(context, myGestureListener())
     private var gameOverListeners = object: DotsAndBoxesGame.GameOverListener {
         override fun onGameOver(game: DotsAndBoxesGame, playerScores: List<Pair<Player, Int>>) {
-        //    invalidate()
+            invalidate()
         }
     }
     private var gameChangeListeners = object: DotsAndBoxesGame.GameChangeListener {
@@ -115,24 +117,23 @@ class GameView: View {
         }
     }
 
-
-    var sep: Float = 0f
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        // Background
+        // measure Background
         val canvasWidth = width.toFloat()
         val canvasHeight = height.toFloat()
+        // draw canvas
         canvas.drawRect(0f, 0f, canvasWidth, canvasHeight, backPaint)
 
         sep = canvasWidth / colCount.toFloat()
-        val gridsep = sep / 2
+        val gridSep = sep / 2
 
-        // draw scores
+        // draw players names and scores in their colours
         canvas.drawText(playerName, canvasWidth/1.85f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
-        canvas.drawText(mGame.playerScores.toString(), canvasWidth/5f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
+        canvas.drawText(mGame.playerScores[0].toString(), canvasWidth/5f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
 
         canvas.drawText(compName, canvasWidth/1.7f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
-        canvas.drawText(mGame.playerScores.toString(), canvasWidth/5f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
+        canvas.drawText(mGame.playerScores[1].toString(), canvasWidth/5f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
 
         // lines
         for (row in 0 until rowCount) {
@@ -140,7 +141,7 @@ class GameView: View {
                 var linePaint: Paint = notDrawnLinePaint
                 var boxPaint: Paint = backPaint
                 if((row % 2 == 0) && (col % 2 == 0)) {
-                    canvas.drawCircle(sep*col+gridsep, sep*row+gridsep, gridsep/4, dotsPaint)
+                    canvas.drawCircle(sep*col+gridSep, sep*row+gridSep, gridSep/4, dotsPaint)
                 }
                 else if((row % 2 == 0) && (col % 2 != 0)) {
                     if(mGame.lines[row, col].isDrawn) {
@@ -148,7 +149,7 @@ class GameView: View {
                     } else {
                         linePaint = notDrawnLinePaint
                     }
-                    canvas.drawLine((sep*col)-gridsep/2, (sep*row)+((sep/2)-(sep/gridsep)), sep*(col+1) + gridsep/2, (sep*row)+((sep/2)-(sep/gridsep/2)), linePaint)
+                    canvas.drawLine((sep*col)-gridSep/2, (sep*row)+((sep/2)-(sep/gridSep)), sep*(col+1) + gridSep/2, (sep*row)+((sep/2)-(sep/gridSep/2)), linePaint)
                 }
                 else if((row % 2 != 0) && (col % 2 == 0)) {
                     if(mGame.lines[row, col].isDrawn) {
@@ -156,7 +157,7 @@ class GameView: View {
                     } else {
                         linePaint = notDrawnLinePaint
                     }
-                    canvas.drawLine((sep*col)+((sep/2)-(sep/gridsep)), (sep*row)-gridsep/2, (sep*col)+((sep/2)-(sep/gridsep)), (sep*(row+1))+gridsep/2, linePaint)
+                    canvas.drawLine((sep*col)+((sep/2)-(sep/gridSep)), (sep*row)-gridSep/2, (sep*col)+((sep/2)-(sep/gridSep)), (sep*(row+1))+gridSep/2, linePaint)
 
                 } else {
                     var boxOwner: Int = calBoxOwner(row, col)
@@ -167,31 +168,13 @@ class GameView: View {
                     } else {
                         boxPaint = backPaint
                     }
-                    canvas.drawRect((sep*col)-gridsep/2, sep*row-gridsep/2, sep*(col+1)+gridsep/2, sep*(row+1) + gridsep/2, boxPaint)
+                    canvas.drawRect((sep*col)-gridSep/2, sep*row-gridSep/2, sep*(col+1)+gridSep/2, sep*(row+1) + gridSep/2, boxPaint)
                 }
             }
         }
-
-        /*
-        for (x in 1..5) {
-            for (y in 1..5) {
-                canvas.drawPoint(x*xSep, y*ySep, dotsPaint)
-            }
-        }
-        for (x in 1..4) {
-            for (y in 1..5) {
-                canvas.drawLine((x-1)*xSep+190f, y*ySep,x*xSep+150f, y*ySep, linesPaint)
-            }
-        }
-        for (y in 1..4) {
-            for (x in 1..5) {
-                canvas.drawLine((x)*xSep, (y-1)*ySep +190f,x*xSep, y*ySep+160f, linesPaint)
-            }
-        }
-        */
     }
 
-    fun calBoxOwner(row: Int, column: Int ): Int {
+    private fun calBoxOwner(row: Int, column: Int): Int {
         if (mGame.players.get(0) == mGame.getBoxOwner(row, column)) {
             return 1
         } else if (mGame.players.get(1) == mGame.getBoxOwner(row, column)) {
@@ -203,6 +186,7 @@ class GameView: View {
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return myGestureDetector.onTouchEvent(ev) || super.onTouchEvent(ev)
     }
+
     inner class myGestureListener: GestureDetector.SimpleOnGestureListener() {
         // You should always include onDown() and it should always return true.
         // Otherwise the GestureListener may ignore other events.
