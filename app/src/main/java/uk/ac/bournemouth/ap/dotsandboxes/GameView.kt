@@ -19,6 +19,7 @@ class GameView: View {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
             super(context, attrs, defStyleAttr)
 
+
     //dots lines boxes colors
     private val dotsCol: Int = Color.BLUE
     private val playerBoxCol: Int = Color.GREEN
@@ -48,27 +49,30 @@ class GameView: View {
     //name values
     private val playerName = "Player1"
     private val compName = "Computer"
-    var players: List<Player> = listOf(StudentDotsBoxGame.PlayerUser(playerName), StudentDotsBoxGame.PlayerComputer(compName))
+    var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
     val mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
 
-    //Listener values
+    constructor(context: Context?, colCount: Int, rowCount: Int, players: List<Player>) : super(context) {
+    }
+
+
     private val myGestureDetector = GestureDetector(context, myGestureListener())
-    private var gameOverListeners = object: DotsAndBoxesGame.GameOverListener {
-        override fun onGameOver(game: DotsAndBoxesGame, playerScores: List<Pair<Player, Int>>) {
-            invalidate()
-        }
-    }
-    private var gameChangeListeners = object: DotsAndBoxesGame.GameChangeListener {
+
+    var gameChangeListenerImp = object: DotsAndBoxesGame.GameChangeListener {
         override fun onGameChange(game: DotsAndBoxesGame) {
+            // Things that we want to do in this View when the game state changes
             invalidate()
         }
     }
+    var gameOverListenerImp = object: DotsAndBoxesGame.GameOverListener {
+        override fun onGameOver(game: DotsAndBoxesGame, playerScores: List<Pair<Player, Int>>) {
+            // Things that we want to do in this View when the game state changes
+            invalidate()
+        }
+    }
+
 
     init {
-        mGame.setGameChangeListener(gameChangeListeners)
-
-        mGame.setGameOverListener(gameOverListeners)
-
         dotsPaint = Paint().apply {
             setStyle(Style.FILL)
             setColor(dotsCol)
@@ -115,6 +119,9 @@ class GameView: View {
             style = Paint.Style.FILL
             setColor(computerBoxCol)
         }
+
+        mGame.setGameChangeListener(gameChangeListenerImp)
+        mGame.setGameOverListener(gameOverListenerImp)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -162,11 +169,11 @@ class GameView: View {
                 } else {
                     var boxOwner: Int = calBoxOwner(row, col)
                     if(boxOwner == 0) {
-                        boxPaint = boxPlayerPaint
-                    } else if(boxOwner == 0) {
-                        boxPaint = boxComputerPaint
-                    } else {
                         boxPaint = backPaint
+                    } else if(boxOwner == 1) {
+                        boxPaint = boxPlayerPaint
+                    } else {
+                        boxPaint = boxComputerPaint
                     }
                     canvas.drawRect((sep*col)-gridSep/2, sep*row-gridSep/2, sep*(col+1)+gridSep/2, sep*(row+1) + gridSep/2, boxPaint)
                 }
@@ -175,13 +182,17 @@ class GameView: View {
     }
 
     private fun calBoxOwner(row: Int, column: Int): Int {
-        if (mGame.players.get(0) == mGame.getBoxOwner(row, column)) {
+        if (mGame.players.get(0) == mGame.getBox(row, column)) {
             return 1
-        } else if (mGame.players.get(1) == mGame.getBoxOwner(row, column)) {
+        } else if (mGame.players.get(1) == mGame.getBox(row, column)) {
             return 2
         }
         return 0
     }
+
+
+
+
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return myGestureDetector.onTouchEvent(ev) || super.onTouchEvent(ev)
@@ -195,17 +206,18 @@ class GameView: View {
         }
         override fun onSingleTapUp(ev: MotionEvent): Boolean {
             //Cal column
-            val xCo = (ev.x / sep).toInt()
+            val xCo = (ev.x/sep).toInt()
             //Cal row
-            val yCo = (ev.y / sep).toInt()
-
-            if (xCo in 0 until colCount && yCo in 0 until rowCount)            {
-                mGame.gameToken(xCo, yCo)
+            val yCo = (ev.y/sep).toInt()
+            if(ev.x.toInt() < colCount*sep && ev.y.toInt() < rowCount*sep) {
+                mGame.getTurnToken(yCo, xCo)
                 mGame.playComputerTurns()
                 return true
+            } else {
+                return false
             }
-            return false
         }
     }
-    // End of myGestureListener class
+
+
 }

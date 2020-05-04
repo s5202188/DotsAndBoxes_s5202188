@@ -14,15 +14,11 @@ abstract class AbstractDotsAndBoxesGame: DotsAndBoxesGame {
     private val onGameChangeListeners = mutableListOf<DotsAndBoxesGame.GameChangeListener>()
 
     override fun addOnGameOverListener(listener: DotsAndBoxesGame.GameOverListener) {
-        if (listener !in onGameOverListeners) {
-            onGameOverListeners.add(listener)
-        }
+        onGameOverListeners.add(listener)
     }
 
     override fun addOnGameChangeListener(listener: DotsAndBoxesGame.GameChangeListener) {
-        if (listener !in onGameChangeListeners) {
-            onGameChangeListeners.add(listener)
-        }
+        onGameChangeListeners.add(listener)
     }
 
     override fun removeOnGameOverListener(listener: DotsAndBoxesGame.GameOverListener) {
