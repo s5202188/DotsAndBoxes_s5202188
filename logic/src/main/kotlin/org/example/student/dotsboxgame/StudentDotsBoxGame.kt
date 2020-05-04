@@ -32,8 +32,6 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     override var isFinished: Boolean = false
     //get() = TODO("Provide this getter. Note you can make it a var to do so")
 
-
-
     override fun playComputerTurns() {
         var current = currentPlayer
         while (current is ComputerPlayer && ! isFinished) {
@@ -57,140 +55,91 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
      */
     inner class StudentLine(lineX: Int, lineY: Int) : AbstractLine(lineX, lineY) {
         override var isDrawn: Boolean = false
+        //get() = TODO("Provide this getter. Note you can make it a var to do so")
 
-        fun isValid(): Boolean {
-            var result = false
-            //The line is only valid if its X or Y coordinates are greater than 0, and less than
-            if((this.lineX >= 0 && this.lineX < columns) && (this.lineY >= 0 && this.lineY < rows))
-            {
-                //Line is horizontal
-                if (isHorizontal())
-                    result = true
-                //Line is vertical
-                else if (isVertical())
-                    result = true
+        fun validLine(): Boolean {
+            if((this.lineX in 0 until columns) && (this.lineY in 0 until rows)) {
+                if (isHorizontal() || isVertical())
+                    return true
             }
-            return result
+            return false
         }
 
         //"You need to look up the correct boxes for this to work")
         //Need to add checks so that a line on the edge of the grid only has one adjacent box
         override var adjacentBoxes: Pair<StudentBox?, StudentBox?> = Pair(null, null)
+        //TODO("You need to look up the correct boxes for this to work")
             get() {
-                if (this.isValid())
-                {
+                if (this.validLine()) {
                     //Line is horizontal
-                    if (isHorizontal() && (this.lineY == 0))
-                    {
+                    if (isHorizontal() && (this.lineY == 0)) {
                         //Get the box below the line
                         field = Pair(null, boxes[this.lineX, this.lineY + 1])
-                    }
-                    else if(isHorizontal() && (this.lineY == (rows - 1)))
-                    {
+                    } else if(isHorizontal() && (this.lineY == (rows - 1))) {
                         //Get the box above the line
                         field = Pair(boxes[this.lineX, this.lineY - 1], null)
-                    }
-                    else if(isHorizontal())
-                    {
+                    } else if(isHorizontal()) {
                         //Get the boxes below and above the line
                         field = Pair(boxes[this.lineX, this.lineY - 1], boxes[this.lineX, this.lineY + 1])
                     }
                     //Line is horizontal
-                    else if (isVertical() && (this.lineX == 0))
-                    {
+                    else if (isVertical() && (this.lineX == 0)) {
                         //Get the box to the right of the line
                         field = Pair(null, boxes[this.lineX + 1, this.lineY])
-                    }
-                    else if(isVertical() && (this.lineX == (columns - 1)))
-                    {
+                    } else if(isVertical() && (this.lineX == (columns - 1))) {
                         //Get the box to the left of the line
                         field = Pair(boxes[this.lineX - 1, this.lineY], null)
-                    }
-                    else if(isVertical())
-                    {
+                    } else if(isVertical()) {
                         //Get the boxes to the left and right of the line
                         field = Pair(boxes[this.lineX - 1, this.lineY], boxes[this.lineX + 1, this.lineY])
                     }
                 }
-
                 return field
             }
 
-        fun isHorizontal(): Boolean
-        {
-            if((this.lineX % 2 != 0) && (this.lineY % 2 == 0))
-                return true
-            else
-                return false
-        }
+        fun isHorizontal(): Boolean = ((this.lineX % 2 != 0) && (this.lineY % 2 == 0))
 
-        fun isVertical(): Boolean
-        {
-            if((this.lineX % 2 == 0) && (this.lineY % 2 != 0))
-                return true
-            else
-                return false
-        }
+        fun isVertical(): Boolean  = ((this.lineX % 2 == 0) && (this.lineY % 2 != 0))
 
         override fun drawLine() {
             isDrawn = true
             fireGameChangeA()
+            //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
             // NOTE read the documentation in the interface, you must also update the current player.
-        }
+            }
     }
 
     inner class StudentBox(boxX: Int, boxY: Int) : AbstractBox(boxX, boxY) {
+        //get() = TODO("Provide this getter. Note you can make it a var to do so")
 
         override var owningPlayer: Player? = null
-            get()
-            {
-                return field
-            }
-            set(value)
-            {
-                field = value
-            }
 
-        /**
-         * This must be lazy or a getter, otherwise there is a chicken/egg problem with the boxes
-         */
-        //Look up the correct lines from the game outer class
+        //override val boundingLines: MutableList<DotsAndBoxesGame.Line> = mutableListOf()
+        //override var boundingLines: List<DotsAndBoxesGame.Line> = mutableListOf()
         override val boundingLines: MutableList<StudentLine> = mutableListOf()
+        //get() = TODO("Look up the correct lines from the game outer class")
 
-        fun setBoundingLines()
-        {
+        fun setBoundingLines() {
             //Get the line above the box
             boundingLines.add(lines[this.boxX, this.boxY - 1])
-
             //Get the line below the box
             boundingLines.add(lines[this.boxX, this.boxY + 1])
-
             //Get the line to the left of the box
             boundingLines.add(lines[this.boxX - 1, this.boxY])
-
             //Get the line to the right of the box
             boundingLines.add(lines[this.boxX + 1, this.boxY])
         }
 
-        fun checkBoxCompletion(): Boolean
-        {
-            //If all surrounding lines of the box has been drawn, the box now belongs to the player
-            //that drew the current line
-            if(boundingLines[0].isDrawn && boundingLines[1].isDrawn &&
-                boundingLines[2].isDrawn && boundingLines[3].isDrawn)
-            {
+        fun checkBoxesLinesDrawn(): Boolean {
+            if(boundingLines[0].isDrawn && boundingLines[1].isDrawn && boundingLines[2].isDrawn && boundingLines[3].isDrawn) {
                 this.owningPlayer = currentPlayer
                 return true
-            }
-            else
-            {
+            } else {
                 return false
             }
         }
 
-        fun validBox(): Boolean {
-            return (this.boxX % 2 != 0) && (this.boxY % 2 != 0)
-        }
+        fun validBox(): Boolean = ((this.boxX % 2 != 0) && (this.boxY % 2 != 0))
     }
 
     class User(recName: String) : HumanPlayer() {
@@ -232,7 +181,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         for(x in 0 until columns) {
             val col = mutableListOf<Pair<Int, Int>>()
             for (y in 0 until rows) {
-                if(lines[x, y].isValid()) {
+                if(lines[x, y].validLine()) {
                     col.add(Pair(x, y))
                 }
             }
@@ -246,16 +195,16 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     }
 
     fun getTurnToken(xCo: Int, yCo: Int): Boolean {
-        if(!lines[xCo, yCo].isDrawn && lines[xCo, yCo].isValid()) {
+        if(!lines[xCo, yCo].isDrawn && lines[xCo, yCo].validLine()) {
             lines[xCo, yCo].drawLine()
 
             if(lines[xCo, yCo].adjacentBoxes.first != null) {
-                if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoxCompletion()) {
+                if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoxesLinesDrawn()) {
                     playerScores[currentPlayerIndex] ++
                     return true
                 }
             } else if(lines[xCo, yCo].adjacentBoxes.second != null) {
-                if(lines[xCo, yCo].adjacentBoxes.second!!.checkBoxCompletion()) {
+                if(lines[xCo, yCo].adjacentBoxes.second!!.checkBoxesLinesDrawn()) {
                     playerScores[currentPlayerIndex] ++
                     return true
                 }
