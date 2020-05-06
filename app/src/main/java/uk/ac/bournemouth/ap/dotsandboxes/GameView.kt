@@ -191,9 +191,6 @@ class GameView: View {
     }
 
 
-
-
-
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return myGestureDetector.onTouchEvent(ev) || super.onTouchEvent(ev)
     }
