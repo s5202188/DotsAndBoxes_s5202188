@@ -49,6 +49,12 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
         playComputerTurns()
     }
 
+    fun play(xCo: Int, yCo: Int)  {
+        if(!lines[xCo,  yCo].isDrawn) {
+            lines[xCo, yCo].drawLine()
+        }
+    }
+
     /**
      * This is an inner class as it needs to refer to the game to be able to look up the correct
      * lines and boxes. Alternatively you can have a game property that does the same thing without
@@ -100,10 +106,13 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
         private fun verticalLine(): Boolean  = ((this.lineX % 2 == 0) && (this.lineY % 2 != 0))
 
         override fun drawLine() {
-            isDrawn = true
+            //isDrawn = true
+            val drawBox = playToken(lineX, lineY)
+            if((currentPlayer is ComputerPlayer) && !drawBox) {
+                playComputerTurns()
+            }
 
-
-            fireGameC()
+            //fireGameC()
             //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
             // NOTE read the documentation in the interface, you must also update the current player.
             }
@@ -120,7 +129,6 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
         //get() = TODO("Look up the correct lines from the game outer class")
 
         fun setBoundingLines() {
-            //Get the line above the box
             boundingLines.add(lines[boxX, boxY - 1])
             boundingLines.add(lines[boxX, boxY + 1])
             boundingLines.add(lines[boxX - 1, boxY])
@@ -129,7 +137,7 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
 
         fun checkBoxesLinesDrawn(): Boolean {
             //if(boundingLines[0].isDrawn && boundingLines[1].isDrawn && boundingLines[2].isDrawn && boundingLines[3].isDrawn) {
-            return if (boundingLines.all{ it.isDrawn }) {
+            return if (boundingLines.all{it.isDrawn }) {
                 owningPlayer = currentPlayer
                 true
             } else {
@@ -152,16 +160,32 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
             name = recName
         }
         override fun makeMove(gameRef: DotsAndBoxesGame) {
+            /*
+            if(gameRef is StudentDotsBoxGame) {
+                //Select a random column of the grid
+                val chosenColumn = gameRef.lineArray.random()
+                //Select a random line from the column
+                val chosenColumnLine = chosenColumn.random()
+                //Invoke the playTurnToken method using the selected line
+                gameRef.playToken(chosenColumnLine.first, chosenColumnLine.second)
+                //Remove the chosen line from the column of un-drawn lines
+                gameRef.lineArray[gameRef.lineArray.indexOf(chosenColumn)].removeAt(chosenColumn.indexOf(chosenColumnLine))
+                //Remove the line column from the list if the column is now empty
+                if(chosenColumn.isEmpty()) {
+                    gameRef.lineArray.removeAt(gameRef.lineArray.indexOf(chosenColumn))
+                }
+            }
 
+             */
             val line = gameRef.lines.filter { !it.isDrawn }.random()
             line.drawLine()
         }
     }
 
-    fun getTurnToken(xCo: Int, yCo: Int): Boolean {
+    fun playToken(xCo: Int, yCo: Int): Boolean {
         var boxDrawn = false
         if(lines[xCo, yCo].validLine() && !lines[xCo, yCo].isDrawn) {
-            lines[xCo, yCo].drawLine()
+            lines[xCo, yCo].isDrawn = true
             if(lines[xCo, yCo].adjacentBoxes.first != null) {
                 if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoxesLinesDrawn()) {
                     playerScores[currentPlayerIndex] ++
@@ -175,17 +199,19 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
                 }
             }
             fireGameC()
+            fireGameChange()
             if (boxDrawn == true) {
-                if (lines.all{ !it.validLine() || it.isDrawn}) {
+                if (lines.all{!it.validLine() || it.isDrawn}) {
                     isFinished = true
                     fireGameO(getPlayersScores())
+                    fireGameOver(getPlayersScores())
                 }
             } else if(currentPlayerIndex == 0) {
-                currentPlayerIndex ++
+                currentPlayerIndex == 1
             } else {
-                currentPlayerIndex --
+                currentPlayerIndex == 0
             }
-            //currentPlayer = players[currentPlayerIndex]
+            currentPlayer = players[currentPlayerIndex]
         }
         return boxDrawn
     }
@@ -211,19 +237,6 @@ class StudentDotsBoxGame(column: Int, row: Int, players: List<Player>) : Abstrac
             lin.add(col)
         }
         return lin
-    }
-
-    fun winningPlayer(): Player {
-        val scoresCal = getPlayersScores()
-        var highestScore: Int = 0
-        var winner: Player = scoresCal.first().first
-        for (i in scoresCal.indices) {
-            if (scoresCal[i].second > highestScore) {
-                winner = scoresCal[i].first
-                highestScore = scoresCal[i].second
-            }
-        }
-        return winner
     }
 
     var onGameChangeListener: DotsAndBoxesGame.GameChangeListener? = null

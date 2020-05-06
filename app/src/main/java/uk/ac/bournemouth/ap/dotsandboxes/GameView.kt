@@ -71,7 +71,6 @@ class GameView: View {
         }
     }
 
-
     init {
         dotsPaint = Paint().apply {
             setStyle(Style.FILL)
@@ -207,8 +206,9 @@ class GameView: View {
             //Cal row
             val yCo = (ev.y/sep).toInt()
             if(ev.x.toInt() < colCount*sep && ev.y.toInt() < rowCount*sep) {
-                mGame.getTurnToken(yCo, xCo)
-                mGame.playComputerTurns()
+                //mGame.playToken(yCo, xCo)
+                //mGame.playComputerTurns()
+                mGame.play(yCo, xCo)
                 return true
             } else {
                 return false
