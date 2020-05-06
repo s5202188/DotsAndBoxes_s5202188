@@ -10,6 +10,13 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
+                android:name=".SettingsActivity"
+                android:parentActivityName=".MainActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".MainActivity" />
+        </activity>
+        <activity
                 android:name=".PlayGameActivity"
                 android:parentActivityName=".MainActivity">
             <meta-data

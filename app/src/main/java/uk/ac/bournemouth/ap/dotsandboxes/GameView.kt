@@ -181,9 +181,9 @@ class GameView: View {
     }
 
     private fun calBoxOwner(row: Int, column: Int): Int {
-        if (mGame.players.get(0) == mGame.getBox(row, column)) {
+        if (mGame.players[0] == mGame.getBox(row, column)) {
             return 1
-        } else if (mGame.players.get(1) == mGame.getBox(row, column)) {
+        } else if (mGame.players[1] == mGame.getBox(row, column)) {
             return 2
         }
         return 0
