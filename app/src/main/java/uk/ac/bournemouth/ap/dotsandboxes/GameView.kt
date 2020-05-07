@@ -41,13 +41,18 @@ class GameView: View {
     private var playerWordsPaint: Paint
 
     //board values
-    private val colCount = 7
-    private val rowCount = 7
+
+    private val columsC = 3
+    private val rowsC = 3
+    private val colCount = columsC * 2 + 1
+    private val rowCount = rowsC * 2 + 1
+
 
     var sep: Float = 0f
 
     //name values
-    private val playerName = "Player1"
+    var playerName = ""
+
     private val compName = "Computer"
     var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
     val mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
@@ -72,6 +77,13 @@ class GameView: View {
     }
 
     init {
+        if (playerName == "") {
+            this.playerName = "Player1"
+        }
+
+        mGame.setGameChangeListener(gameChangeListenerImp)
+        mGame.setGameOverListener(gameOverListenerImp)
+
         dotsPaint = Paint().apply {
             setStyle(Style.FILL)
             setColor(dotsCol)
@@ -118,9 +130,6 @@ class GameView: View {
             style = Paint.Style.FILL
             setColor(computerBoxCol)
         }
-
-        mGame.setGameChangeListener(gameChangeListenerImp)
-        mGame.setGameOverListener(gameOverListenerImp)
     }
 
     override fun onDraw(canvas: Canvas) {

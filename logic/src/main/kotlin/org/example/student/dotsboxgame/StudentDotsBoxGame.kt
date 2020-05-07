@@ -147,17 +147,17 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         fun validBox(): Boolean = ((this.boxX % 2 != 0) && (this.boxY % 2 != 0))
     }
 
-    class User(recName: String) : HumanPlayer() {
-        var name: String = "Player1"
+    class User(pName: String) : HumanPlayer() {
+        private var name: String = ""
         init {
-            this.name = recName
+            name = pName
         }
     }
 
     class PlayerComputer(cName: String): ComputerPlayer() {
-        var name: String = "Computer"
+        private var name: String = ""
         init {
-            this.name = cName
+            name = cName
         }
         override fun makeMove(gameRef: DotsAndBoxesGame) {
             if(gameRef is StudentDotsBoxGame) {
