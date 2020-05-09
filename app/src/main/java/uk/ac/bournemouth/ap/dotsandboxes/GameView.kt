@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.Style
 import android.graphics.Typeface
-import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -15,13 +14,11 @@ import org.example.student.dotsboxgame.StudentDotsBoxGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.DotsAndBoxesGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.Player
 
-
 class GameView: View {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
             super(context, attrs, defStyleAttr)
-
 
     //dots lines boxes colors
     private val dotsCol: Int = Color.BLUE
@@ -50,19 +47,14 @@ class GameView: View {
     private val colCount = gridColumns * 2 + 1
     private val rowCount = gridRows * 2 + 1
 
-
     var sep: Float = 0f
 
     //name values
-    var playerName = ""
+    var playerName = "Player1"
+    var compName = "Computer"
 
-    private val compName = "Computer"
     var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
-    val mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
-
-    constructor(context: Context?, colCount: Int, rowCount: Int, players: List<Player>) : super(context) {
-    }
-
+    var mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
 
     private val myGestureDetector = GestureDetector(context, myGestureListener())
 
@@ -80,16 +72,6 @@ class GameView: View {
     }
 
     init {
-//        var app: PlayGameActivity = context.applicationContext as PlayGameActivity
-//        var settings: SharedPreferences? = app.getSettings()
-//        playerName = settings?.getString("PlayerName", "").toString()
-//        gridColumns = settings?.getString("GridColumns", "").toString().toInt()
-//        gridRows = settings?.getString("gridRows", "").toString().toInt()
-
-
-        if (playerName == "") {
-            this.playerName = "Player1"
-        }
         mGame.setGameChangeListener(gameChangeListenerImp)
         mGame.setGameOverListener(gameOverListenerImp)
 
@@ -152,18 +134,11 @@ class GameView: View {
         sep = canvasWidth / colCount.toFloat()
         val gridSep = sep / 2
 
-        // draw players names and scores in their colours
-        canvas.drawText(playerName, canvasWidth/1.85f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
-        canvas.drawText(mGame.playerScores[0].toString(), canvasWidth/5f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
-
-        canvas.drawText(compName, canvasWidth/1.7f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
-        canvas.drawText(mGame.playerScores[1].toString(), canvasWidth/5f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
-
-        // lines
+        // draw lines, dots and boxes
         for (row in 0 until rowCount) {
             for (col in 0 until colCount) {
-                var linePaint: Paint = notDrawnLinePaint
-                var boxPaint: Paint = backPaint
+                var linePaint: Paint
+                var boxPaint: Paint
                 if((row % 2 == 0) && (col % 2 == 0)) {
                     canvas.drawCircle(sep*col+gridSep, sep*row+gridSep, gridSep/4, dotsPaint)
                 }
@@ -173,7 +148,7 @@ class GameView: View {
                     } else {
                         linePaint = notDrawnLinePaint
                     }
-                    canvas.drawLine((sep*col)-gridSep/2, (sep*row)+((sep/2)-(sep/gridSep)), sep*(col+1) + gridSep/2, (sep*row)+((sep/2)-(sep/gridSep/2)), linePaint)
+                    canvas.drawLine((sep*col)-gridSep/2, (sep*row)+((sep/2)-(sep/gridSep)), sep*(col+1) + gridSep/2, (sep*row)+((sep/2)-(sep/gridSep/2))-1, linePaint)
                 }
                 else if((row % 2 != 0) && (col % 2 == 0)) {
                     if(mGame.lines[row, col].isDrawn) {
@@ -196,17 +171,34 @@ class GameView: View {
                 }
             }
         }
+
+        // draw players names and scores in their colours
+        canvas.drawText(playerName, canvasWidth/1.85f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
+        canvas.drawText(mGame.playerScores[0].toString(), canvasWidth/5f, canvasHeight * 0.8f, playerWordsPaint)
+
+        canvas.drawText(compName, canvasWidth/1.7f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
+        canvas.drawText(mGame.playerScores[1].toString(), canvasWidth/5f, canvasHeight * 0.8f + 150f, computerWordsPaint)
+
+        // draw game results
+        if(mGame.isFinished) {
+            if(mGame.playerScores[0] > mGame.playerScores[1]) {
+                canvas.drawText("Congratulations " + playerName + " you win!", canvasWidth/1.85f, canvasHeight * 0.8f, playerWordsPaint)
+            } else if(mGame.playerScores[0] < mGame.playerScores[1]) {
+                canvas.drawText("Sorry You Lose!", canvasWidth/1.85f, canvasHeight * 0.8f, computerWordsPaint)
+            } else {
+                canvas.drawText("Game was a Draw!", sep, canvasHeight/2, wordsPaint)
+            }
+        }
     }
 
     private fun calBoxOwner(row: Int, column: Int): Int {
-        if (mGame.players[0] == mGame.getBox(row, column)) {
+        if (mGame.players[0] == mGame.getBoxOwner(row, column)) {
             return 1
-        } else if (mGame.players[1] == mGame.getBox(row, column)) {
+        } else if (mGame.players[1] == mGame.getBoxOwner(row, column)) {
             return 2
         }
         return 0
     }
-
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return myGestureDetector.onTouchEvent(ev) || super.onTouchEvent(ev)
@@ -216,7 +208,7 @@ class GameView: View {
         // You should always include onDown() and it should always return true.
         // Otherwise the GestureListener may ignore other events.
         override fun onDown(ev: MotionEvent): Boolean {
-            return true
+            return !(mGame.isFinished)
         }
         override fun onSingleTapUp(ev: MotionEvent): Boolean {
             //Cal column
@@ -224,8 +216,6 @@ class GameView: View {
             //Cal row
             val yCo = (ev.y/sep).toInt()
             if(ev.x.toInt() < colCount*sep && ev.y.toInt() < rowCount*sep) {
-                //mGame.playToken(yCo, xCo)
-                //mGame.playComputerTurns()
                 mGame.play(yCo, xCo)
                 return true
             } else {
@@ -233,6 +223,4 @@ class GameView: View {
             }
         }
     }
-
-
 }

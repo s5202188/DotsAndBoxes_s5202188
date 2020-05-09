@@ -19,13 +19,14 @@ class SettingsActivity : AppCompatActivity() {
 
         supportActionBar!!.title = "Dots And Boxes"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
     }
 
     fun onSave(view: View) {
+        //get text views
         val inputPlayerName = (findViewById<EditText>(R.id.editNameText)).text.toString()
         val inputGridColumns = (findViewById<EditText>(R.id.editColumns)).text.toString()
         val inputGridRows = (findViewById<EditText>(R.id.editRows)).text.toString()
+        //if any text views are empty
         if (inputPlayerName.trim().isNotEmpty()) {
             playerName = inputPlayerName
         } else {
