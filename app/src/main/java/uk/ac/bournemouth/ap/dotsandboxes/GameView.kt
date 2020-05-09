@@ -1,17 +1,20 @@
 package uk.ac.bournemouth.ap.dotsandboxes
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.View;
-import android.graphics.Canvas;
+
+import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
+import android.graphics.Paint
+import android.graphics.Paint.Style
 import android.graphics.Typeface
+import android.preference.PreferenceManager
+import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.View
 import org.example.student.dotsboxgame.StudentDotsBoxGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.DotsAndBoxesGame
 import uk.ac.bournemouth.ap.dotsandboxeslib.Player
+
 
 class GameView: View {
     constructor(context: Context?) : super(context)
@@ -42,10 +45,10 @@ class GameView: View {
 
     //board values
 
-    private val columsC = 3
-    private val rowsC = 3
-    private val colCount = columsC * 2 + 1
-    private val rowCount = rowsC * 2 + 1
+    private var gridColumns = 3
+    private var gridRows = 3
+    private val colCount = gridColumns * 2 + 1
+    private val rowCount = gridRows * 2 + 1
 
 
     var sep: Float = 0f
@@ -77,10 +80,16 @@ class GameView: View {
     }
 
     init {
+//        var app: PlayGameActivity = context.applicationContext as PlayGameActivity
+//        var settings: SharedPreferences? = app.getSettings()
+//        playerName = settings?.getString("PlayerName", "").toString()
+//        gridColumns = settings?.getString("GridColumns", "").toString().toInt()
+//        gridRows = settings?.getString("gridRows", "").toString().toInt()
+
+
         if (playerName == "") {
             this.playerName = "Player1"
         }
-
         mGame.setGameChangeListener(gameChangeListenerImp)
         mGame.setGameOverListener(gameOverListenerImp)
 
