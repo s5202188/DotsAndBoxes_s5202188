@@ -50,11 +50,11 @@ class GameView: View {
     var sep: Float = 0f
 
     //name values
-    var playerName = "Player1"
-    var compName = "Computer"
+    private var playerName = "Player1"
+    private var compName = "Computer"
 
-    var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
-    var mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
+    private var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
+    val mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
 
     private val myGestureDetector = GestureDetector(context, myGestureListener())
 

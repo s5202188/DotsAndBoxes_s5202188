@@ -3,6 +3,7 @@ package org.example.student.dotsboxgame
 import uk.ac.bournemouth.ap.dotsandboxeslib.*
 import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.Matrix
 import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.MutableMatrix
+import java.util.*
 
 class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : AbstractDotsAndBoxesGame() {
 
@@ -33,13 +34,20 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
 
     override fun playComputerTurns() {
         var current = currentPlayer
-        while (current is ComputerPlayer && ! isFinished) {
+        while (current is ComputerPlayer && !isFinished) {
             current.makeMove(this)
             current = currentPlayer
         }
     }
 
     fun play(xCo: Int, yCo: Int) {
+        if(!lines[xCo,  yCo].isDrawn) {
+            val boxDrawn = playToken(xCo, yCo)
+            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
+                playComputerTurns()
+            }
+        }
+/*
         if (!isFinished) {
             var boxDrawn = playToken(xCo, yCo)
             if ((!boxDrawn && currentPlayer is PlayerComputer) || (boxDrawn && currentPlayer is User)) {
@@ -47,15 +55,13 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             }
             playComputerTurns()
         }
+ */
     }
 
     init {
-        for(box in boxes) {
-            if(box.validBox()) {
-                box.setBoundingLines()
-            }
+        for(bx in boxes) {
+            if(bx.validBox()) bx.setBoundingLines()
         }
-        playComputerTurns()
     }
 
     /**
@@ -97,18 +103,18 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             }
 
         fun validLine(): Boolean {
-            if((this.lineX >= 0 && this.lineX < columns) && (this.lineY >= 0 && this.lineY < rows)) {
+            if((this.lineX in 0 until columns) && (this.lineY in 0 until rows)) {
                 return (((this.lineX % 2 != 0) && (this.lineY % 2 == 0)) || ((this.lineX % 2 == 0) && (this.lineY % 2 != 0)))
             }
             return false
         }
 
-
         override fun drawLine() {
             isDrawn = true
-
+            fireGameC()
+            fireGameChange()
             //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
-            // NOTE read the documentation in the interface, you must also update the current player.
+            //NOTE read the documentation in the interface, you must also update the current player.
         }
     }
 
@@ -137,6 +143,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 return false
             }
         }
+
         fun validBox(): Boolean = ((this.boxX % 2 != 0) && (this.boxY % 2 != 0))
     }
 
@@ -152,22 +159,22 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         init {
             name = cName
         }
-        override fun makeMove(dbGame: DotsAndBoxesGame) {
-            if(dbGame is StudentDotsBoxGame) {
-                val randCol = dbGame.lineArray.random()
+        override fun makeMove(game: DotsAndBoxesGame) {
+            if(game is StudentDotsBoxGame) {
+                val randCol = game.computerLines.random()
                 val randRow = randCol.random()
-                dbGame.playToken(randRow.first, randRow.second)
-                dbGame.lineArray[dbGame.lineArray.indexOf(randCol)].removeAt(randCol.indexOf(randRow))
+                game.playToken(randRow.first, randRow.second)
+                game.computerLines[game.computerLines.indexOf(randCol)].removeAt(randCol.indexOf(randRow))
                 if(randCol.isEmpty()) {
-                    dbGame.lineArray.removeAt(dbGame.lineArray.indexOf(randCol))
+                    game.computerLines.removeAt(game.computerLines.indexOf(randCol))
                 }
             }
         }
     }
 
-    var lineArray = initiateArray()
+    var computerLines = initiateLineArray()
 
-    private fun initiateArray(): MutableList<MutableList<Pair<Int, Int>>> {
+    private fun initiateLineArray(): MutableList<MutableList<Pair<Int, Int>>> {
         val lin = mutableListOf<MutableList<Pair<Int, Int>>>()
         for(x in 0 until columns) {
             val col = mutableListOf<Pair<Int, Int>>()
@@ -181,16 +188,15 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         return lin
     }
 
-    fun getBoxOwner(col: Int, row: Int): Player? {
-        return boxes[col, row].owningPlayer
-    }
-
     fun playToken(xCo: Int, yCo: Int): Boolean {
         var drawBox = false
-
+        if (lines.all{it.isDrawn}) {
+            isFinished = true
+            fireGameO(getPlayersScores())
+            fireGameOver(getPlayersScores())
+        }
         if(!lines[xCo, yCo].isDrawn && lines[xCo, yCo].validLine()) {
             lines[xCo, yCo].drawLine()
-
             if(lines[xCo, yCo].adjacentBoxes.first != null) {
                 if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoxesLinesDrawn()) {
                     playerScores[currentPlayerIndex] ++
@@ -203,15 +209,10 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                     drawBox = true
                 }
             }
-            fireGameC()
-            fireGameChange()
-            if (drawBox) {
-                if (lines.all{!it.validLine() || it.isDrawn}) {
-                    isFinished = true
-                    fireGameO(getPlayersScores())
-                    fireGameOver(getPlayersScores())
-                }
-            } else {
+//            fireGameC()
+//            fireGameChange()
+
+            if (!drawBox) {
                 if(currentPlayerIndex < 1) {
                     currentPlayerIndex ++
                 } else {
@@ -223,12 +224,16 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         return drawBox
     }
 
-    fun getPlayersScores(): List<Pair<Player, Int>> {
+    private fun getPlayersScores(): List<Pair<Player, Int>> {
         val pScore = mutableListOf<Pair<Player, Int>>()
         for (i in players.indices) {
             pScore[i] = Pair(players[i], playerScores[i])
         }
         return pScore
+    }
+
+    fun getBoxOwner(col: Int, row: Int): Player? {
+        return boxes[col, row].owningPlayer
     }
 
     var onGameChangeListener: DotsAndBoxesGame.GameChangeListener? = null

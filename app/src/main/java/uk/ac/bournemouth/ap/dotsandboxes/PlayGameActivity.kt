@@ -11,7 +11,7 @@ import org.example.student.dotsboxgame.StudentDotsBoxGame
 class PlayGameActivity : AppCompatActivity() {
     var playerName = "Player1"
 
-    lateinit var mGameView: GameView
+//    lateinit var mGameView: GameView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +20,7 @@ class PlayGameActivity : AppCompatActivity() {
         supportActionBar!!.title = "Dots And Boxes"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
+        /*
         val settings : SharedPreferences = getSharedPreferences("UserSettings", 0)
         val inputPlayerName = settings.getString("PlayerName", "").toString()
         val inputGridCol = settings.getInt("GridColumns", 3)
@@ -31,10 +32,10 @@ class PlayGameActivity : AppCompatActivity() {
             playerName = "Player1"
         }
 
-//        mGameView = GameView(this)
-//        mGameView.mGame = StudentDotsBoxGame(inputGridCol, inputGridRows, listOf(StudentDotsBoxGame.User("Player1"), StudentDotsBoxGame.PlayerComputer("Computer")))
-//        setContentView(mGameView)
-
+        mGameView = GameView(this)
+        mGameView.mGame = StudentDotsBoxGame(inputGridCol, inputGridRows, listOf(StudentDotsBoxGame.User("Player1"), StudentDotsBoxGame.PlayerComputer("Computer")))
+        setContentView(mGameView)
+*/
     }
 
 }
