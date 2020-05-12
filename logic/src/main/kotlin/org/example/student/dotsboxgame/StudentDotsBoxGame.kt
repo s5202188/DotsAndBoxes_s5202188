@@ -40,25 +40,18 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         }
     }
 
-    fun play(xCo: Int, yCo: Int) {
-        if(!lines[xCo,  yCo].isDrawn) {
-            val boxDrawn = playToken(xCo, yCo)
-            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
-                playComputerTurns()
-            }
-        }
-    }
-
-    fun playz(xCo: Int, yCo: Int) {
+    //old ver
+//    fun play(xCo: Int, yCo: Int) {
 //        if(!lines[xCo,  yCo].isDrawn) {
 //            val boxDrawn = playToken(xCo, yCo)
 //            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
 //                playComputerTurns()
 //            }
 //        }
-        if(!lines[xCo,  yCo].isDrawn) {
-            lines[xCo, yCo].drawLine()
-        }
+//    }
+
+    fun play(xCo: Int, yCo: Int) {
+        lines[xCo, yCo].drawLine()
     }
 
     init {
@@ -83,22 +76,16 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             get() {
                 if (validLine()) {
                     if (((this.lineX % 2 != 0) && (this.lineY % 2 == 0)) && (this.lineY == 0)) {
-                        //box below the line
                         field = Pair(null, boxes[this.lineX, this.lineY + 1])
                     } else if(((this.lineX % 2 != 0) && (this.lineY % 2 == 0)) && (this.lineY == (rows - 1))) {
-                        //box above the line
                         field = Pair(boxes[this.lineX, this.lineY - 1], null)
                     } else if(((this.lineX % 2 != 0) && (this.lineY % 2 == 0))) {
-                        //boxes below and above the line
                         field = Pair(boxes[this.lineX, this.lineY - 1], boxes[this.lineX, this.lineY + 1])
                     } else if (((this.lineX % 2 == 0) && (this.lineY % 2 != 0)) && (this.lineX == 0)) {
-                        //box to right of the line
                         field = Pair(null, boxes[this.lineX + 1, this.lineY])
                     } else if(((this.lineX % 2 == 0) && (this.lineY % 2 != 0)) && (this.lineX == (columns - 1))) {
-                        //box to left of the line
                         field = Pair(boxes[this.lineX - 1, this.lineY], null)
                     } else if(((this.lineX % 2 == 0) && (this.lineY % 2 != 0))) {
-                        //boxes to  left and right of the line
                         field = Pair(boxes[this.lineX - 1, this.lineY], boxes[this.lineX + 1, this.lineY])
                     }
                 }
@@ -113,17 +100,16 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         }
 
         override fun drawLine() {
-            if(isDrawn) throw IllegalStateException("Line already drawn")
+            if (!lines[lineX, lineY].isDrawn) {
+                if (isDrawn) throw IllegalStateException("Line already drawn")
 
-            val boxDrawn = playToken(lineX, lineY)
-            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
-                playComputerTurns()
+                val boxDrawn = playToken(lineX, lineY)
+                if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
+                    playComputerTurns()
+                }
+                //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
+                //NOTE read the documentation in the interface, you must also update the current player.
             }
-//            isDrawn = true
-//            fireGameC()
-//            fireGameChange()
-            //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
-            //NOTE read the documentation in the interface, you must also update the current player.
         }
     }
 
@@ -152,51 +138,23 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 return false
             }
         }
-
         fun validBox(): Boolean = ((this.boxX % 2 != 0) && (this.boxY % 2 != 0))
     }
 
     class User(pName: String) : HumanPlayer() {
         var name: String = ""
-        init {
-            name = pName
-        }
+        init { name = pName }
     }
 
     class PlayerComputer(cName: String): ComputerPlayer() {
         var name: String = ""
-        init {
-            name = cName
-        }
+        init { name = cName }
         override fun makeMove(game: DotsAndBoxesGame) {
-//            if(game is StudentDotsBoxGame) {
-//                val randCol = game.computerLines.random()
-//                val randRow = randCol.random()
-//                game.playToken(randRow.first, randRow.second)
-//                game.computerLines[game.computerLines.indexOf(randCol)].removeAt(randCol.indexOf(randRow))
-//                if(randCol.isEmpty()) {
-//                    game.computerLines.removeAt(game.computerLines.indexOf(randCol))
-//                }
-//            }
-            val lines = game.lines.filter { !it.isDrawn }.random()
+            val lines = game.lines.filter {
+                !it.isDrawn
+            }.random()
             lines.drawLine()
         }
-    }
-
-    var computerLines = initiateLineArray()
-
-    private fun initiateLineArray(): MutableList<MutableList<Pair<Int, Int>>> {
-        val lin = mutableListOf<MutableList<Pair<Int, Int>>>()
-        for(x in 0 until columns) {
-            val col = mutableListOf<Pair<Int, Int>>()
-            for (y in 0 until rows) {
-                if(lines[x, y].validLine()) {
-                    col.add(Pair(x, y))
-                }
-            }
-            lin.add(col)
-        }
-        return lin
     }
 
     fun playToken(xCo: Int, yCo: Int): Boolean {
@@ -216,8 +174,6 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                     drawBox = true
                 }
             }
-            fireGameC()
-            fireGameChange()
             if (drawBox && (lines.all{it.isDrawn})) {
                 isFinished = true
                 fireGameO(getPlayersScores())
@@ -231,6 +187,8 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 }
                 currentPlayer = players[currentPlayerIndex]
             }
+            fireGameC()
+            fireGameChange()
         }
         return drawBox
     }
