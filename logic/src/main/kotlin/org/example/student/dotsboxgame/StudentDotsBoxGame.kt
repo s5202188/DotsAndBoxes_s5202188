@@ -47,15 +47,18 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 playComputerTurns()
             }
         }
-/*
-        if (!isFinished) {
-            var boxDrawn = playToken(xCo, yCo)
-            if ((!boxDrawn && currentPlayer is PlayerComputer) || (boxDrawn && currentPlayer is User)) {
-                playComputerTurns()
-            }
-            playComputerTurns()
+    }
+
+    fun playz(xCo: Int, yCo: Int) {
+//        if(!lines[xCo,  yCo].isDrawn) {
+//            val boxDrawn = playToken(xCo, yCo)
+//            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
+//                playComputerTurns()
+//            }
+//        }
+        if(!lines[xCo,  yCo].isDrawn) {
+            lines[xCo, yCo].drawLine()
         }
- */
     }
 
     init {
@@ -110,9 +113,15 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         }
 
         override fun drawLine() {
-            isDrawn = true
-            fireGameC()
-            fireGameChange()
+            if(isDrawn) throw IllegalStateException("Line already drawn")
+
+            val boxDrawn = playToken(lineX, lineY)
+            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
+                playComputerTurns()
+            }
+//            isDrawn = true
+//            fireGameC()
+//            fireGameChange()
             //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
             //NOTE read the documentation in the interface, you must also update the current player.
         }
@@ -160,15 +169,17 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             name = cName
         }
         override fun makeMove(game: DotsAndBoxesGame) {
-            if(game is StudentDotsBoxGame) {
-                val randCol = game.computerLines.random()
-                val randRow = randCol.random()
-                game.playToken(randRow.first, randRow.second)
-                game.computerLines[game.computerLines.indexOf(randCol)].removeAt(randCol.indexOf(randRow))
-                if(randCol.isEmpty()) {
-                    game.computerLines.removeAt(game.computerLines.indexOf(randCol))
-                }
-            }
+//            if(game is StudentDotsBoxGame) {
+//                val randCol = game.computerLines.random()
+//                val randRow = randCol.random()
+//                game.playToken(randRow.first, randRow.second)
+//                game.computerLines[game.computerLines.indexOf(randCol)].removeAt(randCol.indexOf(randRow))
+//                if(randCol.isEmpty()) {
+//                    game.computerLines.removeAt(game.computerLines.indexOf(randCol))
+//                }
+//            }
+            val lines = game.lines.filter { !it.isDrawn }.random()
+            lines.drawLine()
         }
     }
 
@@ -190,13 +201,9 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
 
     fun playToken(xCo: Int, yCo: Int): Boolean {
         var drawBox = false
-        if (lines.all{it.isDrawn}) {
-            isFinished = true
-            fireGameO(getPlayersScores())
-            fireGameOver(getPlayersScores())
-        }
+
         if(!lines[xCo, yCo].isDrawn && lines[xCo, yCo].validLine()) {
-            lines[xCo, yCo].drawLine()
+            lines[xCo, yCo].isDrawn = true
             if(lines[xCo, yCo].adjacentBoxes.first != null) {
                 if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoxesLinesDrawn()) {
                     playerScores[currentPlayerIndex] ++
@@ -209,9 +216,13 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                     drawBox = true
                 }
             }
-//            fireGameC()
-//            fireGameChange()
-
+            fireGameC()
+            fireGameChange()
+            if (drawBox && (lines.all{it.isDrawn})) {
+                isFinished = true
+                fireGameO(getPlayersScores())
+                fireGameOver(getPlayersScores())
+            }
             if (!drawBox) {
                 if(currentPlayerIndex < 1) {
                     currentPlayerIndex ++
