@@ -2,6 +2,7 @@ package uk.ac.bournemouth.ap.dotsandboxeslib.test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
@@ -33,7 +34,11 @@ abstract class TestDotsAndBoxes {
     fun testGameMaxWidth(width: Int, height: Int) {
         val game = createGame(width, height)
         val lastX = game.boxes.maxBy { it.boxX }?.boxX
-        assertEquals(width - 1, lastX)
+        assertEquals(
+            width - 1,
+            lastX,
+            "The highest horizontal box index is expected to be 1 less than the width of the game (in boxes) - This may not be true if you use a different coordinate system"
+                    )
     }
 
     /**
@@ -44,7 +49,11 @@ abstract class TestDotsAndBoxes {
     fun testGameMinWidth(width: Int, height: Int) {
         val game = createGame(width, height)
         val firstX = game.boxes.minBy { it.boxX }?.boxX
-        assertEquals(0, firstX)
+        assertEquals(
+            0,
+            firstX,
+            "The smallest horizontal box index is expected to be 0 - This may not be true if you use a different coordinate system"
+                    )
     }
 
     /**
@@ -55,7 +64,11 @@ abstract class TestDotsAndBoxes {
     fun testGameMaxHeight(width: Int, height: Int) {
         val game = createGame(width, height)
         val lastY = game.boxes.maxBy { it.boxY }?.boxY
-        assertEquals(height - 1, lastY)
+        assertEquals(
+            height - 1,
+            lastY,
+            "The higest vertical box index is expected to be 1 less than the height of the game (in boxes) - This may not be true if you use a different coordinate system"
+                    )
     }
 
     /**
@@ -66,7 +79,11 @@ abstract class TestDotsAndBoxes {
     fun testGameMinHeight(width: Int, height: Int) {
         val game = createGame(width, height)
         val firstY = game.boxes.minBy { it.boxY }?.boxY
-        assertEquals(0, firstY)
+        assertEquals(
+            0,
+            firstY,
+            "The smallest vertical box index is expected to be 0 - This may not be true if you use a different coordinate system"
+                    )
     }
 
     /**
@@ -77,8 +94,8 @@ abstract class TestDotsAndBoxes {
     fun testGameLineIndexMinX(width: Int, height: Int) {
         val game = createGame(width, height)
         val firstX = game.lines.minBy { it.lineX }?.lineX
-        assertNotNull(firstX)
-        assertTrue(firstX!! >= 0, "The lowest line index is at least 0")
+        assertNotNull(firstX, "There should be at least one line (even for a 1x1 game)")
+        assertTrue(firstX!! >= 0, "The lowest line index should be at least 0")
     }
 
     /**
@@ -89,8 +106,8 @@ abstract class TestDotsAndBoxes {
     fun testGameLineIndexMinY(width: Int, height: Int) {
         val game = createGame(width, height)
         val firstY = game.lines.minBy { it.lineY }?.lineY
-        assertNotNull(firstY)
-        assertTrue(firstY!! >= 0, "The lowest line index is at least 0")
+        assertNotNull(firstY, "There should be at least one line (even for a 1x1 game)")
+        assertTrue(firstY!! >= 0, "The lowest line index should be at least 0")
     }
 
     /**
@@ -100,7 +117,7 @@ abstract class TestDotsAndBoxes {
     @MethodSource("gameSizes")
     fun testGamePlayers(width: Int, height: Int) {
         val game = createGame(width, height)
-        assertEquals(2, game.players.size)
+        assertEquals(2, game.players.size, "Default games should have 2 players")
     }
 
     /**
@@ -112,7 +129,11 @@ abstract class TestDotsAndBoxes {
     fun testPlayerList(playerCount: Int) {
         val players = List(playerCount) { HumanPlayer() }
         val game = createGame(players = players)
-        assertEquals(players, game.players)
+        assertEquals(
+            players,
+            game.players,
+            "The amount of players should be the same as that passed in to the createGame function"
+                    )
     }
 
     /**
@@ -127,7 +148,7 @@ abstract class TestDotsAndBoxes {
         players.clear() // Remove players from the list
         assertEquals(
             playerCount, game.players.size,
-            "The player list in the game should be a copy"
+            "The player list in the game should be a copy of the list passed in, not the same object"
                     )
     }
 
@@ -183,7 +204,10 @@ abstract class TestDotsAndBoxes {
     fun testAllHaveANeighbor(width: Int, height: Int) {
         val game = createGame(width, height)
         for (line in game.lines) {
-            assertTrue(line.adjacentBoxes.toList().size in 1..2)
+            assertTrue(
+                line.adjacentBoxes.toList().filterNotNull().size in 1..2,
+                "Each box should return 1 or 2 adjacent boxes - set them to null if they are not valid"
+                      )
         }
     }
 
@@ -201,12 +225,19 @@ abstract class TestDotsAndBoxes {
         for (line in game.lines) {
             for (n in line.adjacentBoxes) {
                 val c = n.coordinates
-                assertTrue(c in expectedBoxes)
+                assertTrue(
+                    c in expectedBoxes,
+                    "The box with coordinates $c (found as adjacent box to the line with coordinates ${line.coordinates}) should also be present in the boxes returned by DotsAndBoxesGame.boxes"
+                          )
                 seenBoxes.add(c)
 
             }
         }
-        assertEquals(expectedBoxes.size, seenBoxes.size)
+        assertEquals(
+            expectedBoxes.size,
+            seenBoxes.size,
+            "game.boxes should return boxes with exactly those coordinates that are returned through the adjacent boxes of a line"
+                    )
     }
 
     /**
@@ -222,14 +253,19 @@ abstract class TestDotsAndBoxes {
         for (box in game.boxes) {
             for (l in box.boundingLines) {
                 val c = l.coordinates
-                assertTrue(c in expectedLines)
+                assertTrue(
+                    c in expectedLines,
+                    "The line $c returned as bounding line for the box at ${box.coordinates} should also be returned in DotsAndBoxesGame.lines"
+                          )
                 seenLines.add(c)
             }
         }
         assertEquals(expectedLines.size, seenLines.size) {
             val missingLines = expectedLines.toMutableSet()
             missingLines.removeAll(seenLines)
-            "Expected lines: $missingLines"
+            "Some lines returned by DotsAndBoxesGame.lines were not returned as bounding lines of the boxes in the game." +
+                    "Most likely the validation function on the lines sparseMatrix is incorrect. The extra lines are: $missingLines"
+
         }
     }
 
@@ -245,7 +281,7 @@ abstract class TestDotsAndBoxes {
             for (line in box.boundingLines) {
                 assertTrue(
                     seenLines.add(line.coordinates),
-                    "Line at coordinate ${line.coordinates} occurs multiple times in box ${box}"
+                    "Line at coordinate ${line.coordinates} occurs multiple times in box ${box} at ${box.coordinates}"
                           )
             }
         }
@@ -262,7 +298,7 @@ abstract class TestDotsAndBoxes {
         for (box in game.boxes) {
             assertTrue(
                 seenBoxes.add(box.coordinates),
-                "Box at coordinate ${box.coordinates} occurs multiple times in the game"
+                "Box $box at coordinate ${box.coordinates} occurs multiple times in the game"
                       )
         }
     }
@@ -273,6 +309,7 @@ abstract class TestDotsAndBoxes {
      */
     @ParameterizedTest(name = "size = ({0}, {1})")
     @MethodSource("gameSizes")
+    @Deprecated("Duplicates testAllBoxesAreNeighbors")
     fun testAllKnownNeighbors(width: Int, height: Int) {
         val game = createGame(width, height)
         val allBoxCoordinates = game.boxes.asSequence().map(Box::coordinates).toSet()
@@ -281,11 +318,18 @@ abstract class TestDotsAndBoxes {
             for (n in line.adjacentBoxes) {
                 val coordinates = n.coordinates
                 // Check that all neighbor boxes
-                assertTrue(coordinates in allBoxCoordinates)
+                assertTrue(
+                    coordinates in allBoxCoordinates,
+                    "The box with coordinates $coordinates (found as adjacent box to the line with coordinates ${line.coordinates}) should also be present in the boxes returned by DotsAndBoxesGame.boxes"
+                          )
                 neighborCoordinates.add(coordinates)
             }
         }
-        assertEquals(allBoxCoordinates.size, neighborCoordinates.size)
+        assertEquals(
+            allBoxCoordinates.size,
+            neighborCoordinates.size,
+            "game.boxes should return boxes with exactly those coordinates that are returned through the adjacent boxes of a line"
+                    )
     }
 
     /**
@@ -314,10 +358,15 @@ abstract class TestDotsAndBoxes {
                         }
                         when (sameLines.size) {
                             0 -> fail("No single line copy found")
-                            1 -> { }
+                            1 -> {
+                            }
                             else -> fail<Unit>("multiple lines found ${sameLines}")
                         }
-                        assertEquals(line.coordinates, sameLines.single().coordinates)
+                        assertEquals(
+                            line.coordinates, sameLines.single().coordinates,
+                            "There should be exactly 1 line in common between neigbors box $adjBox at " +
+                                    "${adjBox.coordinates} and box $other at ${other.coordinates} "
+                                    )
                     } else {
                         adjBox.boundingLines.singleOrNull { candidateLine ->
                             candidateLine.adjacentBoxes.equiv(boxesToTest) &&
@@ -341,12 +390,13 @@ abstract class TestDotsAndBoxes {
         }
         run {
             val line = game.lines[lineCoordinates]
-            assertTrue(line.isDrawn)
-            assertThrows<Exception> {
+            assertTrue(line.isDrawn, "After drawing a line, its isDrawn property should now be true")
+            assertThrows<Exception>("Attempting to draw a line already drawn should throw an exception (any exception)") {
                 line.drawLine()
             }
         }
     }
+
     /**
      * Test making a single move on an otherwise empty game.
      */
@@ -362,32 +412,32 @@ abstract class TestDotsAndBoxes {
 
         val origLines = game.lines.toList()
         val lineToPlay = origLines.random(rnd) // Pick a random line to play
-        assertEquals(false, origLines[lineToPlay.coordinates].isDrawn)
+        assertEquals(false, origLines[lineToPlay.coordinates].isDrawn, "A game just created should not have any drawn line")
         // The player before drawing
         val origPlayer = game.currentPlayer
 
         lineToPlay.drawLine()
 
         // The amount of lines in the game should not have changed.
-        assertEquals(origLines.size, game.lines.count())
+        assertEquals(origLines.size, game.lines.count(), "The amount of lames in a game should be constant")
 
         // The line that was just played. There is no requirement for this to be the same object
         // as the `lineToPlay` - or for `lineToPlay` to still be valid so we find it again.
         val newLine = game.lines[lineToPlay.coordinates]
 
         // The reloaded line needs to be drawn
-        assertEquals(true, newLine.isDrawn)
+        assertEquals(true, newLine.isDrawn, "The line returned from lines with the drawn coordinates should have the isDrawn property set, even if it is not the exact same object")
         // There should be exactly one drawn line in th game
-        assertEquals(1, game.lines.count { it.isDrawn })
+        assertEquals(1, game.lines.count { it.isDrawn }, "A game with one move should have exactly 1 line drawn")
         // Playing the single line cannot complete a box, so no repeat turns. New player is needed
-        assertNotEquals(origPlayer, game.currentPlayer)
+        assertNotEquals(origPlayer, game.currentPlayer, "After a single move, the first player cannot be the current player as a repeat move requires a completed box (at least 3 lines for triangles, 4 for rectangles etc.)")
         // Check that the playing triggered the listener exactly once for a game state change
-        assertEquals(1, gameListener.onGameChangeCalled)
-        // Check that the game over listener was not calle
-        assertFalse(gameListener.onGameOverCalled)
+        assertEquals(1, gameListener.onGameChangeCalled, "The game change listener should have been invoked exactly once")
+        // Check that the game over listener was not called
+        assertFalse(gameListener.onGameOverCalled, "The game cannot be complete after a single move")
         // Check that none of the boxes next to the line has become complete/gotten an owner
         for (b in newLine.adjacentBoxes) {
-            assertNull(b.owningPlayer)
+            assertNull(b.owningPlayer, "After only 1 move, no box can have an owner")
         }
     }
 
@@ -414,12 +464,12 @@ abstract class TestDotsAndBoxes {
             run {
                 val lineFromGame = game.lines[lineCoordinate]
                 val box = game.boxes[targetCoordinate]
-                val lineFromBox = box.boundingLines.single { it.coordinates == lineCoordinate }
-                assertNull(box.owningPlayer)
-                assertEquals(lineCoordinate, lineFromGame.coordinates)
-                assertEquals(lineCoordinate, lineFromBox.coordinates)
-                assertFalse(lineFromBox.isDrawn)
-                assertFalse(lineFromGame.isDrawn)
+                val lineFromBox = box.boundingLines.singleOrNull { it.coordinates == lineCoordinate } ?: fail("There should be a single line surrounding the box with the expected coordinates")
+                assertNull(box.owningPlayer, "When starting a game, no box should have an owner")
+                assertEquals(lineCoordinate, lineFromGame.coordinates, "The coordinates of a line should match those used to retrieve it (in DotsAndBoxesGame.lines)")
+                assertEquals(lineCoordinate, lineFromBox?.coordinates, "When getting the box again, there should be exactly 1 line in the bounding lines of the box with the coordinates")
+                assertFalse(lineFromBox.isDrawn, "This game draws its own lines, so the line should not be magically become drawn when getting it through the box")
+                assertFalse(lineFromGame.isDrawn, "This game draws its own lines, so the line should not be magically become drawn when getting it from DotsAndBoxesGame.line")
                 val playFromGame = rnd.nextBoolean()
                 if (playFromGame) {
                     lineFromGame.drawLine()
@@ -431,18 +481,18 @@ abstract class TestDotsAndBoxes {
                 val lineFromGame = game.lines[lineCoordinate]
                 val box = game.boxes[targetCoordinate]
                 val lineFromBox = box.boundingLines.single { it.coordinates == lineCoordinate }
-                assertTrue(lineFromBox.isDrawn)
-                assertTrue(lineFromGame.isDrawn)
+                assertTrue(lineFromBox.isDrawn, "After drawing a line it should be drawn when retrieving it as bounding line of a box")
+                assertTrue(lineFromGame.isDrawn, "After drawing a line it should be drawn when retrieving it from DotsAndBoxesGame.lines")
             }
         }
         run {
             val playedBox = game.boxes[targetCoordinate]
-            assertNotNull(playedBox.owningPlayer)
+            assertNotNull(playedBox.owningPlayer, "When all bounding lines of a box are drawn, the box should now have an owning player")
             for (line in playedBox.boundingLines) {
-                assertTrue(line.isDrawn)
+                assertTrue(line.isDrawn, "All the lines that bound the box should have their isDrawn property as true.")
             }
             for (lineCoordinate in lineCoordinatesToPlay) {
-                assertTrue(game.lines[lineCoordinate].isDrawn)
+                assertTrue(game.lines[lineCoordinate].isDrawn, "For the bounding line coordinates, retrieving the lines with those coordinates should have drawn lines")
             }
         }
 
@@ -470,10 +520,10 @@ abstract class TestDotsAndBoxes {
         lineToPlay.drawLine()
 
         // Both listeners should have been called
-        assertEquals(1, gameListener1.onGameChangeCalled)
-        assertEquals(1, gameListener2.onGameChangeCalled)
+        assertEquals(1, gameListener1.onGameChangeCalled, "The 1st gameChangeListener should have been called exactly once")
+        assertEquals(1, gameListener2.onGameChangeCalled, "The 2nd gameChangeListener should have been called exactly once")
         // Game over should not have been called
-        assertFalse(gameListener2.onGameOverCalled)
+        assertFalse(gameListener2.onGameOverCalled, "The game over listener should not have been called at all")
 
         run {
             // When removing listener 2 it should not be updated when playing
@@ -482,8 +532,8 @@ abstract class TestDotsAndBoxes {
             game.removeOnGameChangeListener(gameListener2)
             val nextLineToPlay = game.lines.filter { !it.isDrawn }.random(rnd)
             nextLineToPlay.drawLine()
-            assertEquals(2, gameListener1.onGameChangeCalled)
-            assertEquals(1, gameListener2.onGameChangeCalled)
+            assertEquals(2, gameListener1.onGameChangeCalled, "After the 2nd gameChangeListener has been removed, the first one should have still been called on a drawLine")
+            assertEquals(1, gameListener2.onGameChangeCalled, "After the 2nd gameChangeListener has been removed, it should not be called on a drawLine")
         }
 
         run {
@@ -493,8 +543,8 @@ abstract class TestDotsAndBoxes {
             game.removeOnGameChangeListener(gameListener1)
             val nextLineToPlay = game.lines.filter { !it.isDrawn }.random(rnd)
             nextLineToPlay.drawLine()
-            assertEquals(2, gameListener1.onGameChangeCalled)
-            assertEquals(2, gameListener2.onGameChangeCalled)
+            assertEquals(2, gameListener1.onGameChangeCalled, "After removing the 1st gameChnageListener it should not be called on a drawLine")
+            assertEquals(2, gameListener2.onGameChangeCalled, "After re-adding the 2nd gameChangeListener (and removing the 1st), it should be called again on drawLine")
         }
     }
 
@@ -507,7 +557,7 @@ abstract class TestDotsAndBoxes {
     @MethodSource("gameMoveData")
     fun testCompleteGame(width: Int, height: Int, rnd: Random) {
         val game = createGame(width, height)
-        assertFalse(game.isFinished)
+        assertFalse(game.isFinished, "A game should not start out finished")
 
         // We use two listeners to allow us to better test onGameOver behaviour.
         val gameListener1 = TestGameListener(game)
@@ -532,31 +582,31 @@ abstract class TestDotsAndBoxes {
 
         for (lineCoord in lineCoordinatesToPlay) {
             val line = game.lines[lineCoord]
-            assertFalse(line.isDrawn) // It can not have been drawn yet
+            assertFalse(line.isDrawn, "Lines should not just turn up as drawn as the coordinates for lines are supposed to be unique") // It can not have been drawn yet
 
             // record the current player to check complete box ownership
             val player = game.currentPlayer
             line.drawLine() // make the move
 
-            assertFalse(game.isFinished) // The game cannot be finished
+            assertFalse(game.isFinished, "Until the last line has been drawn, the game cannot be complete/finished") // The game cannot be finished
             /*
              * If this completed a box, then the owning player must be the current player,
              * otherwise it must be `null`
              */
             for (neighbor in game.lines[lineCoord].adjacentBoxes) {
                 if (neighbor.boundingLines.all(Line::isDrawn)) {
-                    assertEquals(player, neighbor.owningPlayer)
+                    assertEquals(player, neighbor.owningPlayer, "If a neighboring box of a just drawn line has all its lines drawn, the owner of the box should be the player that was the current player before calling drawLine")
                 } else {
-                    assertNull(neighbor.owningPlayer)
+                    assertNull(neighbor.owningPlayer, "If a box doesn't have all its lines drawn it should not have an owner")
                 }
             }
             // Check that no gameover listener was called
-            assertFalse(gameListener2.onGameOverCalled)
-            assertFalse(gameListener1.onGameOverCalled)
+            assertFalse(gameListener2.onGameOverCalled, "The game isn't finished, so gameOver should not have been called on listener 1")
+            assertFalse(gameListener1.onGameOverCalled, "The game isn't finished, so gameOver should not have been called on listener 2")
             // Check that onGameChange was called
-            assertNotEquals(lastGameChangeCount, gameListener1.onGameChangeCalled)
-            assertNotEquals(lastGameChangeCount, gameListener2.onGameChangeCalled)
-            assertEquals(gameListener1.onGameChangeCalled, gameListener2.onGameChangeCalled)
+            assertNotEquals(lastGameChangeCount, gameListener1.onGameChangeCalled, "onGameChange should have been called on listener 1")
+            assertNotEquals(lastGameChangeCount, gameListener2.onGameChangeCalled, "onGameChange should have been called on listener 2")
+            assertEquals(gameListener1.onGameChangeCalled, gameListener2.onGameChangeCalled, "both game change listeners should have been called with the same frequency")
             lastGameChangeCount = gameListener1.onGameChangeCalled
         }
 
@@ -565,11 +615,11 @@ abstract class TestDotsAndBoxes {
         val adjacents = lastLineToPlay.adjacentBoxes.run { first?.coordinates to second?.coordinates }
         for (box in game.boxes) {
             if (box.coordinates in adjacents) {
-                assertEquals(1, box.boundingLines.count { !it.isDrawn })
-                assertNull(box.owningPlayer)
+                assertEquals(1, box.boundingLines.count { !it.isDrawn }, "The boxes adjacent to the last undrawn line should only have 1 undrawn line")
+                assertNull(box.owningPlayer, "THe boxes adjacent to the last undrawn line should not have an owner")
             } else {
-                assertTrue(box.boundingLines.all { it.isDrawn })
-                assertNotNull(box.owningPlayer)
+                assertTrue(box.boundingLines.all { it.isDrawn }, "A box not adjacent to the last undrawn line should have all its lines drawn")
+                assertNotNull(box.owningPlayer, "A box not adjacent to the last undrawn line should have an owning player")
             }
         }
 
@@ -587,37 +637,37 @@ abstract class TestDotsAndBoxes {
         }
 
         lastLineToPlay.drawLine()
-        assertTrue(game.isFinished)
+        assertTrue(game.isFinished, "After drawing the last undrawn line the game should be finished.")
 
         // Depending on which listener was dropped we check the stats on the listener being called
         if (isDropFirstListener) {
-            assertEquals(lastGameChangeCount, gameListener1.onGameChangeCalled)
-            assertNotEquals(lastGameChangeCount, gameListener2.onGameChangeCalled)
-            assertFalse(gameListener1.onGameOverCalled)
-            assertTrue(gameListener2.onGameOverCalled)
+            assertEquals(lastGameChangeCount, gameListener1.onGameChangeCalled, "When listener 1 is unregistered, it should not be called on the last game play")
+            assertNotEquals(lastGameChangeCount, gameListener2.onGameChangeCalled, "When listener 1 is unregistered, listener 2 should still be informed of game change on the last play")
+            assertFalse(gameListener1.onGameOverCalled, "When listener 1 is unregistered, it should not be informed of game completion")
+            assertTrue(gameListener2.onGameOverCalled, "When listener 1 is unregistered, listener 2 should still be informed of game completion")
         } else {
-            assertNotEquals(lastGameChangeCount, gameListener1.onGameChangeCalled)
-            assertEquals(lastGameChangeCount, gameListener2.onGameChangeCalled)
-            assertTrue(gameListener1.onGameOverCalled)
+            assertNotEquals(lastGameChangeCount, gameListener1.onGameChangeCalled, "When listener 2 is unregistered, listener 1 should still be informed of game change on the last play")
+            assertEquals(lastGameChangeCount, gameListener2.onGameChangeCalled, "When listener 2 is unregistered, it should not be called on the last game play")
+            assertTrue(gameListener1.onGameOverCalled, "When listener 2 is unregistered, listener 1 should still be informed of game completion")
             assertFalse(
                 gameListener2.onGameOverCalled,
                 "On game over called even though the second listener should have been removed"
                        )
         }
         // One of the listeners should not have been called
-        assertNotEquals(gameListener1.onGameChangeCalled, gameListener2.onGameChangeCalled)
+        assertNotEquals(gameListener1.onGameChangeCalled, gameListener2.onGameChangeCalled, "The two listeners should not have been called about game changes the same amount of time")
 
         // Of course all boxes adjacent to the last line should be owned by the last player
         // and all the lines should be drawn
         for (c in adjacents) {
             val b = game.boxes[c]
-            assertEquals(lastPlayerToPlay, b.owningPlayer)
-            assertTrue(b.boundingLines.all(Line::isDrawn))
+            assertEquals(lastPlayerToPlay, b.owningPlayer, "The boxes adjacent to the last line should have the last player as owner, box $b at $c does not")
+            assertTrue(b.boundingLines.all(Line::isDrawn), "All bounding lines of the adjacent boxes to the last line should be drawn")
         }
 
         // In general all lines should be drawn and all boxes owned
-        assertTrue(game.lines.all(Line::isDrawn))
-        assertTrue(game.boxes.all { it.owningPlayer != null })
+        assertTrue(game.lines.all(Line::isDrawn), "All lines in the game/returned by DotsAndBoxesGame.lines should be drawn as the game is finished")
+        assertTrue(game.boxes.all { it.owningPlayer != null }, "All boxes in the game/returned by DotsAndBoxesGame.boxes should have an owner")
     }
 
     /**
@@ -644,7 +694,7 @@ abstract class TestDotsAndBoxes {
         }
         var humanTurns = 0
 
-        while(lineCoordinatesToPlayIterator.hasNext()) {
+        while (lineCoordinatesToPlayIterator.hasNext()) {
             assertEquals(players[0], game.currentPlayer)
             val drawnLines = game.lines.count { it.isDrawn }
             val lineToPlay = game.lines[lineCoordinatesToPlayIterator.next()]
@@ -654,8 +704,8 @@ abstract class TestDotsAndBoxes {
             // computer player, that could be completing the box itself.
             val boxesThatWillComplete = mutableListOf<Coordinate<Box>>()
             for (b in lineToPlay.adjacentBoxes) {
-                assertNull(b.owningPlayer)
-                if (b.boundingLines.count { !it.isDrawn } ==1) {
+                assertNull(b.owningPlayer, "The adjacent boxes to a line to be played should not have an owner")
+                if (b.boundingLines.count { !it.isDrawn } == 1) {
                     boxesThatWillComplete.add(b.coordinates)
                 }
             }
@@ -663,28 +713,29 @@ abstract class TestDotsAndBoxes {
             humanTurns++
 
             var didCompleteBox = false
-            for(bcoord in boxesThatWillComplete) {
+            for (bcoord in boxesThatWillComplete) {
                 val b = game.boxes[bcoord]
                 // Check box owners
-                if (b.boundingLines.all { it.isDrawn } ) {
+                if (b.boundingLines.all { it.isDrawn }) {
                     didCompleteBox = true
-                    assertEquals(players[0], b.owningPlayer)
+                    assertEquals(players[0], b.owningPlayer, "For all boxes that had 1 undrawn line, check that they are now owned by the human player")
                 } else {
-                    assertNull(b.owningPlayer)
+                    fail("Boxes that have a line drawn and only had 1 undrawn line should never not have all lines drawn afterwards")
+                    assertNull(b.owningPlayer, "If boxes are not drawn they should not have an owner")
                 }
             }
 
             if (didCompleteBox) {
                 // We drew a box, no computer turn
-                assertEquals(oldComputerTurns, computerPlayer.computerTurns)
-                assertEquals(drawnLines+1, game.lines.count { it.isDrawn })
+                assertEquals(oldComputerTurns, computerPlayer.computerTurns, "If the human player completes a box, the computer player should not get a turn")
+                assertEquals(drawnLines + 1, game.lines.count { it.isDrawn }, "the amount of lines expected to be drawn should equal the amount of lines actually drawn")
             } else {
                 // Computer gets one or multiple turns
-                assertTrue(oldComputerTurns< computerPlayer.computerTurns)
-                assertTrue(drawnLines+1< game.lines.count { it.isDrawn })
+                assertTrue(oldComputerTurns < computerPlayer.computerTurns, "The amount of computer turns should be at least 1 more than previously")
+                assertTrue(drawnLines + 1 < game.lines.count { it.isDrawn }, "The amount of actually drawn line needs to be at least 2 more than previous (1 human turn, 1+ computer turns)")
             }
         }
-        assertEquals(game.lines.count(), humanTurns+computerPlayer.computerTurns)
+        assertEquals(game.lines.count(), humanTurns + computerPlayer.computerTurns, "The total amount of turns by the computer + the total amount of turns by the \"human\" should equal the actual amount of lines")
     }
 
 
@@ -788,6 +839,7 @@ fun Pair<Box?, Box?>.equiv(other: Pair<Box?, Box?>): Boolean {
 
 /** Helper to get coordinates for a box */
 val Box.coordinates get() = (this as? AbstractBox)?.pos ?: Coordinate(boxX, boxY)
+
 /** Helper to get coordinates for a line */
 val Line.coordinates get() = (this as? AbstractLine)?.pos ?: Coordinate(lineX, lineY)
 
@@ -815,16 +867,16 @@ class TestComputerPlayer : ComputerPlayer() {
      * set to be owned by this computer player.
      */
     override fun makeMove(game: DotsAndBoxesGame) {
-        assertTrue(moveIterator.hasNext())
+        assertTrue(moveIterator.hasNext(), "There should still be a move to play when the computer player is asked to make a move (was isFinished updated correctly?)")
         val line = game.lines[moveIterator.next()]
         line.drawLine()
-        assertTrue(game.lines[line.coordinates].isDrawn)
+        assertTrue(game.lines[line.coordinates].isDrawn, "After the computer draws a line, the line at that coordinate should be drawn")
         computerTurns++
         for (b in line.adjacentBoxes) {
             if (b.boundingLines.all { it.isDrawn }) {
-                assertEquals(this, b.owningPlayer)
+                assertEquals(this, b.owningPlayer, "If the computer move completed a box, the computer player should be the owner")
             } else {
-                assertNull(b.owningPlayer)
+                assertNull(b.owningPlayer, "If the computer move didn't complete a box, the box should not have an owner")
             }
         }
     }
@@ -841,13 +893,13 @@ class TestGameListener<G : DotsAndBoxesGame>(val expectedGame: G) : DotsAndBoxes
     var onGameOverCalled = false
 
     override fun onGameOver(game: DotsAndBoxesGame, scores: List<Pair<Player, Int>>) {
-        assertEquals(expectedGame, game)
+        assertEquals(expectedGame, game, "The game passed to the listener should be the game that was created for the test")
         assertEquals(false, onGameOverCalled, "A game can not be over twice")
         onGameOverCalled = true
     }
 
     override fun onGameChange(game: DotsAndBoxesGame) {
-        assertEquals(expectedGame, game)
+        assertEquals(expectedGame, game, "The game passed to the listener should be the game created for the test")
         onGameChangeCalled++
     }
 }

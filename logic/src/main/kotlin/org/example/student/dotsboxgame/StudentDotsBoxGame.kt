@@ -107,8 +107,6 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
                     playComputerTurns()
                 }
-                fireGameC()
-                fireGameChange()
             }
             //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
             //NOTE read the documentation in the interface, you must also update the current player.
@@ -184,15 +182,15 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 }
                 currentPlayer = players[currentPlayerIndex]
             }
-            if (boxDrawn) {
-                if (lines.all{!it.validLine() || it.isDrawn}) {
-                    isFinished = true
-                    fireGameO(getPlayersScores())
-                    fireGameOver(getPlayersScores())
-                }
-            }
-//            fireGameC()
-//            fireGameChange()
+//            if (boxDrawn) {
+//                if (lines.all{!it.validLine() || it.isDrawn}) {
+//                    isFinished = true
+//                    fireGameO(getPlayersScores())
+//                    fireGameOver(getPlayersScores())
+//                }
+//            }
+            fireGameC()
+            fireGameChange()
         }
         return boxDrawn
     }

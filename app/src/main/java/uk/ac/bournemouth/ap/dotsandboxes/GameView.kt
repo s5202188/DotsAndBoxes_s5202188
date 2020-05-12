@@ -54,7 +54,14 @@ class GameView: View {
     private var compName = "Computer"
 
     private var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
-    val mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
+    var mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
+        set(value) {
+            field.removeOnGameChangeListener(gameChangeListenerImp)
+            field.removeOnGameOverListener(gameOverListenerImp)
+            field = value
+            value.addOnGameChangeListener(gameChangeListenerImp)
+            value.addOnGameOverListener(gameOverListenerImp)
+        }
 
     private val myGestureDetector = GestureDetector(context, myGestureListener())
 
@@ -104,13 +111,13 @@ class GameView: View {
         computerWordsPaint = Paint().apply {
             setColor(computerBoxCol)
             setTextAlign(Paint.Align.CENTER)
-            setTextSize(100.toFloat())
+            setTextSize(70.toFloat())
             setTypeface(Typeface.SANS_SERIF)
         }
         playerWordsPaint = Paint().apply {
             setColor(playerBoxCol)
             setTextAlign(Paint.Align.CENTER)
-            setTextSize(100.toFloat())
+            setTextSize(70.toFloat())
             setTypeface(Typeface.SANS_SERIF)
         }
         boxPlayerPaint = Paint().apply {
@@ -173,20 +180,20 @@ class GameView: View {
         }
 
         // draw players names and scores in their colours
-        canvas.drawText(playerName, canvasWidth/1.85f, canvasHeight.toFloat() * 0.8f, playerWordsPaint)
+        canvas.drawText(playerName, canvasWidth/1.85f, canvasHeight * 0.8f, playerWordsPaint)
         canvas.drawText(mGame.playerScores[0].toString(), canvasWidth/5f, canvasHeight * 0.8f, playerWordsPaint)
 
-        canvas.drawText(compName, canvasWidth/1.7f, canvasHeight.toFloat() * 0.8f + 150f, computerWordsPaint)
-        canvas.drawText(mGame.playerScores[1].toString(), canvasWidth/5f, canvasHeight * 0.8f + 150f, computerWordsPaint)
+        canvas.drawText(compName, canvasWidth/1.7f, canvasHeight * 0.88f, computerWordsPaint)
+        canvas.drawText(mGame.playerScores[1].toString(), canvasWidth/5f, canvasHeight * 0.88f, computerWordsPaint)
 
         // draw game results
         if(mGame.isFinished) {
             if(mGame.playerScores[0] > mGame.playerScores[1]) {
-                canvas.drawText("Congratulations " + playerName + " you win!", canvasWidth/1.85f, canvasHeight * 0.8f, playerWordsPaint)
+                canvas.drawText("Congratulations " + playerName + " you win!", canvasWidth*0.5f, canvasHeight * 0.98f, playerWordsPaint)
             } else if(mGame.playerScores[0] < mGame.playerScores[1]) {
-                canvas.drawText("Sorry You Lose!", canvasWidth/1.85f, canvasHeight * 0.8f, computerWordsPaint)
-            } else {
-                canvas.drawText("Game was a Draw!", sep, canvasHeight/2, wordsPaint)
+                canvas.drawText("Sorry You Lose!", canvasWidth*0.5f, canvasHeight * 0.98f, computerWordsPaint)
+            } else if(mGame.playerScores[0] == mGame.playerScores[1]) {
+                canvas.drawText("Game was a Draw!", canvasWidth*0.5f, canvasHeight * 0.98f, wordsPaint)
             }
         }
     }
