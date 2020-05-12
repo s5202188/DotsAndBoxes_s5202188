@@ -139,10 +139,10 @@ class GameView: View {
             for (col in 0 until colCount) {
                 var linePaint: Paint
                 var boxPaint: Paint
-                if((row % 2 == 0) && (col % 2 == 0)) {
+                if((row%2 == 0) && (col%2 == 0)) {
                     canvas.drawCircle(sep*col+gridSep, sep*row+gridSep, gridSep/4, dotsPaint)
                 }
-                else if((row % 2 == 0) && (col % 2 != 0)) {
+                else if((row%2 == 0) && (col%2 != 0)) {
                     if(mGame.lines[row, col].isDrawn) {
                         linePaint = drawnLinePaint
                     } else {
@@ -150,7 +150,7 @@ class GameView: View {
                     }
                     canvas.drawLine((sep*col)-gridSep/2, (sep*row)+((sep/2)-(sep/gridSep)), sep*(col+1) + gridSep/2, (sep*row)+((sep/2)-(sep/gridSep/2))-1, linePaint)
                 }
-                else if((row % 2 != 0) && (col % 2 == 0)) {
+                else if((row%2 != 0) && (col%2 == 0)) {
                     if(mGame.lines[row, col].isDrawn) {
                         linePaint = drawnLinePaint
                     } else {
@@ -159,7 +159,7 @@ class GameView: View {
                     canvas.drawLine((sep*col)+((sep/2)-(sep/gridSep)), (sep*row)-gridSep/2, (sep*col)+((sep/2)-(sep/gridSep)), (sep*(row+1))+gridSep/2, linePaint)
 
                 } else {
-                    var boxOwner: Int = calBoxOwner(row, col)
+                    var boxOwner = calBoxOwner(row, col)
                     if(boxOwner == 0) {
                         boxPaint = backPaint
                     } else if(boxOwner == 1) {
@@ -192,12 +192,13 @@ class GameView: View {
     }
 
     private fun calBoxOwner(row: Int, column: Int): Int {
+        var owner = 0
         if (mGame.players[0] == mGame.getBoxOwner(row, column)) {
-            return 1
+            owner = 1
         } else if (mGame.players[1] == mGame.getBoxOwner(row, column)) {
-            return 2
+            owner = 2
         }
-        return 0
+        return owner
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
@@ -208,7 +209,7 @@ class GameView: View {
         // You should always include onDown() and it should always return true.
         // Otherwise the GestureListener may ignore other events.
         override fun onDown(ev: MotionEvent): Boolean {
-            return !(mGame.isFinished)
+            return (!mGame.isFinished == true)
         }
         override fun onSingleTapUp(ev: MotionEvent): Boolean {
             //Cal column

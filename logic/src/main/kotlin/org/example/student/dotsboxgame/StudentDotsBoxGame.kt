@@ -3,7 +3,7 @@ package org.example.student.dotsboxgame
 import uk.ac.bournemouth.ap.dotsandboxeslib.*
 import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.Matrix
 import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.MutableMatrix
-import java.util.*
+
 
 class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : AbstractDotsAndBoxesGame() {
 
@@ -55,7 +55,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     }
 
     init {
-        for(bx in boxes) {
+        for(bx:StudentDotsBoxGame.StudentBox in boxes) {
             if(bx.validBox()) bx.setBoundingLines()
         }
     }
@@ -75,41 +75,43 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             //TODO("You need to look up the correct boxes for this to work")
             get() {
                 if (validLine()) {
-                    if (((this.lineX % 2 != 0) && (this.lineY % 2 == 0)) && (this.lineY == 0)) {
-                        field = Pair(null, boxes[this.lineX, this.lineY + 1])
-                    } else if(((this.lineX % 2 != 0) && (this.lineY % 2 == 0)) && (this.lineY == (rows - 1))) {
-                        field = Pair(boxes[this.lineX, this.lineY - 1], null)
-                    } else if(((this.lineX % 2 != 0) && (this.lineY % 2 == 0))) {
-                        field = Pair(boxes[this.lineX, this.lineY - 1], boxes[this.lineX, this.lineY + 1])
-                    } else if (((this.lineX % 2 == 0) && (this.lineY % 2 != 0)) && (this.lineX == 0)) {
-                        field = Pair(null, boxes[this.lineX + 1, this.lineY])
-                    } else if(((this.lineX % 2 == 0) && (this.lineY % 2 != 0)) && (this.lineX == (columns - 1))) {
-                        field = Pair(boxes[this.lineX - 1, this.lineY], null)
-                    } else if(((this.lineX % 2 == 0) && (this.lineY % 2 != 0))) {
-                        field = Pair(boxes[this.lineX - 1, this.lineY], boxes[this.lineX + 1, this.lineY])
+                    if (((lineX % 2 != 0) && (lineY % 2 == 0)) && (lineY == 0)) {
+                        field = Pair(null, boxes[lineX, lineY + 1])
+                    } else if(((lineX % 2 != 0) && (lineY % 2 == 0)) && (lineY == (rows - 1))) {
+                        field = Pair(boxes[lineX, lineY - 1], null)
+                    } else if(((lineX % 2 != 0) && (lineY % 2 == 0))) {
+                        field = Pair(boxes[lineX, lineY - 1], boxes[lineX, lineY + 1])
+                    } else if (((lineX % 2 == 0) && (lineY % 2 != 0)) && (lineX == 0)) {
+                        field = Pair(null, boxes[lineX + 1, lineY])
+                    } else if(((lineX % 2 == 0) && (lineY % 2 != 0)) && (lineX == (columns - 1))) {
+                        field = Pair(boxes[lineX - 1, lineY], null)
+                    } else if(((lineX % 2 == 0) && (lineY % 2 != 0))) {
+                        field = Pair(boxes[lineX - 1, lineY], boxes[lineX + 1, lineY])
                     }
                 }
                 return field
             }
 
         fun validLine(): Boolean {
-            if((this.lineX in 0 until columns) && (this.lineY in 0 until rows)) {
-                return (((this.lineX % 2 != 0) && (this.lineY % 2 == 0)) || ((this.lineX % 2 == 0) && (this.lineY % 2 != 0)))
+            if((lineX in 0 until columns) && (lineY in 0 until rows)) {
+                return (((lineX % 2 == 0) && (lineY % 2 != 0)) || (((lineX % 2 != 0) && (lineY % 2 == 0))))
+            } else {
+                return false
             }
-            return false
         }
 
         override fun drawLine() {
             if (!lines[lineX, lineY].isDrawn) {
-                if (isDrawn) throw IllegalStateException("Line already drawn")
-
-                val boxDrawn = playToken(lineX, lineY)
+                if (isDrawn == true) throw IllegalStateException("Line already drawn")
+                val boxDrawn : Boolean = playToken(lineX, lineY)
                 if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
                     playComputerTurns()
                 }
-                //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
-                //NOTE read the documentation in the interface, you must also update the current player.
+                fireGameC()
+                fireGameChange()
             }
+            //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
+            //NOTE read the documentation in the interface, you must also update the current player.
         }
     }
 
@@ -124,20 +126,21 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         //get() = TODO("Look up the correct lines from the game outer class")
 
         fun setBoundingLines() {
-            boundingLines.add(lines[this.boxX, this.boxY - 1])
-            boundingLines.add(lines[this.boxX, this.boxY + 1])
-            boundingLines.add(lines[this.boxX - 1, this.boxY])
-            boundingLines.add(lines[this.boxX + 1, this.boxY])
+            boundingLines.add(lines[boxX, boxY - 1])
+            boundingLines.add(lines[boxX, boxY + 1])
+            boundingLines.add(lines[boxX - 1, boxY])
+            boundingLines.add(lines[boxX + 1, boxY])
         }
 
-        fun checkBoxesLinesDrawn(): Boolean {
-            if (boundingLines.all{it.isDrawn}) {
+        fun checkBoundingLines(): Boolean {
+            if (boundingLines.all{it.isDrawn == true}) {
                 this.owningPlayer = currentPlayer
                 return true
             } else {
                 return false
             }
         }
+
         fun validBox(): Boolean = ((this.boxX % 2 != 0) && (this.boxY % 2 != 0))
     }
 
@@ -158,28 +161,22 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     }
 
     fun playToken(xCo: Int, yCo: Int): Boolean {
-        var drawBox = false
-
-        if(!lines[xCo, yCo].isDrawn && lines[xCo, yCo].validLine()) {
+        var boxDrawn : Boolean = false
+        if(lines[xCo, yCo].validLine() && !(lines[xCo, yCo].isDrawn)) {
             lines[xCo, yCo].isDrawn = true
             if(lines[xCo, yCo].adjacentBoxes.first != null) {
-                if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoxesLinesDrawn()) {
+                if(lines[xCo, yCo].adjacentBoxes.first!!.checkBoundingLines()) {
                     playerScores[currentPlayerIndex] ++
-                    drawBox = true
+                    boxDrawn = true
                 }
             }
             if(lines[xCo, yCo].adjacentBoxes.second != null) {
-                if(lines[xCo, yCo].adjacentBoxes.second!!.checkBoxesLinesDrawn()) {
+                if(lines[xCo, yCo].adjacentBoxes.second!!.checkBoundingLines()) {
                     playerScores[currentPlayerIndex] ++
-                    drawBox = true
+                    boxDrawn = true
                 }
             }
-            if (drawBox && (lines.all{it.isDrawn})) {
-                isFinished = true
-                fireGameO(getPlayersScores())
-                fireGameOver(getPlayersScores())
-            }
-            if (!drawBox) {
+            if (!boxDrawn) {
                 if(currentPlayerIndex < 1) {
                     currentPlayerIndex ++
                 } else {
@@ -187,10 +184,17 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 }
                 currentPlayer = players[currentPlayerIndex]
             }
-            fireGameC()
-            fireGameChange()
+            if (boxDrawn) {
+                if (lines.all{!it.validLine() || it.isDrawn}) {
+                    isFinished = true
+                    fireGameO(getPlayersScores())
+                    fireGameOver(getPlayersScores())
+                }
+            }
+//            fireGameC()
+//            fireGameChange()
         }
-        return drawBox
+        return boxDrawn
     }
 
     private fun getPlayersScores(): List<Pair<Player, Int>> {
