@@ -216,7 +216,7 @@ class GameView: View {
         // You should always include onDown() and it should always return true.
         // Otherwise the GestureListener may ignore other events.
         override fun onDown(ev: MotionEvent): Boolean {
-            return (!mGame.isFinished == true)
+            return (mGame.isFinished == false)
         }
         override fun onSingleTapUp(ev: MotionEvent): Boolean {
             //Cal column

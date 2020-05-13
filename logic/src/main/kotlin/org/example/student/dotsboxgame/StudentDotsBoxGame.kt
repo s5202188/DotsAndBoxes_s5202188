@@ -4,12 +4,11 @@ import uk.ac.bournemouth.ap.dotsandboxeslib.*
 import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.Matrix
 import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.MutableMatrix
 
-
 class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : AbstractDotsAndBoxesGame() {
 
-    private var currentPlayerIndex: Int = 0
     private val columns: Int = columns
     private val rows: Int = rows
+    private var currentPlayerIndex: Int = 0
 
     var playerScores = mutableListOf<Int>(0, 0)
 
@@ -17,7 +16,12 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     //TODO("You will need to get players from your constructor")
     //add a parameter to the constructor with type List<Player> (or Iterable<Player>), then you get that from the constructor parameter to set your property (and remember the players)
 
-    override var currentPlayer: Player = players[currentPlayerIndex]
+//    override var currentPlayer: Player = players[currentPlayerIndex]
+    override val currentPlayer: Player
+    get() {
+        return players[currentPlayerIndex]
+    }
+
     //TODO("Determine the current player, like keeping" + "the index into the players list")
 
     // NOTE: you may want to me more specific in the box type if you use that type in your class
@@ -27,6 +31,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
 
     //override val lines: SparseMatrix<DotsAndBoxesGame.Line> = MutableSparseMatrix(columns, rows, ::StudentLine)
     override val lines: Matrix<StudentLine> = MutableMatrix<StudentLine>(columns, rows, ::StudentLine)
+
     //TODO("Create a matrix initialized with your own line type")
 
     override var isFinished: Boolean = false
@@ -93,20 +98,23 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             }
 
         fun validLine(): Boolean {
-            if((lineX in 0 until columns) && (lineY in 0 until rows)) {
-                return (((lineX % 2 == 0) && (lineY % 2 != 0)) || (((lineX % 2 != 0) && (lineY % 2 == 0))))
-            } else {
-                return false
+            if ((lineX in 0 until columns) && (lineY in 0 until rows)) {
+                if (((lineX % 2 == 0) && (lineY % 2 != 0)) || ((lineX % 2 != 0) && (lineY % 2 == 0))) {
+                    return true
+                }
             }
+            return false
         }
 
         override fun drawLine() {
-            if (!lines[lineX, lineY].isDrawn) {
-                if (isDrawn == true) throw IllegalStateException("Line already drawn")
-                val boxDrawn : Boolean = playToken(lineX, lineY)
-                if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
+            if (!isFinished && lines[lineX, lineY].isDrawn == false) {
+                var boxDrawn : Boolean = playToken(lineX, lineY)
+                if (!boxDrawn && currentPlayer is PlayerComputer) {
                     playComputerTurns()
                 }
+            } else if (isFinished) {
+                fireGameO(getPlayersScores())
+                fireGameOver(getPlayersScores())
             }
             //TODO("Implement the logic for a player drawing a line. Don't forget to inform the listeners (fireGameChange, fireGameOver)")
             //NOTE read the documentation in the interface, you must also update the current player.
@@ -119,7 +127,6 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         override var owningPlayer: Player? = null
 
         //override val boundingLines: MutableList<DotsAndBoxesGame.Line> = mutableListOf()
-        //override var boundingLines: List<DotsAndBoxesGame.Line> = mutableListOf()
         override val boundingLines: MutableList<StudentLine> = mutableListOf()
         //get() = TODO("Look up the correct lines from the game outer class")
 
@@ -132,7 +139,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
 
         fun checkBoundingLines(): Boolean {
             if (boundingLines.all{it.isDrawn == true}) {
-                this.owningPlayer = currentPlayer
+                owningPlayer = currentPlayer
                 return true
             } else {
                 return false
@@ -152,8 +159,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         init { name = cName }
         override fun makeMove(game: DotsAndBoxesGame) {
             val lines = game.lines.filter {
-                !it.isDrawn
-            }.random()
+                !it.isDrawn}.random()
             lines.drawLine()
         }
     }
@@ -175,24 +181,25 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 }
             }
             if (!boxDrawn) {
-                if(currentPlayerIndex < 1) {
+                if(currentPlayerIndex == 0) {
                     currentPlayerIndex ++
                 } else {
                     currentPlayerIndex --
                 }
-                currentPlayer = players[currentPlayerIndex]
             }
-//            if (boxDrawn) {
-//                if (lines.all{!it.validLine() || it.isDrawn}) {
-//                    isFinished = true
-//                    fireGameO(getPlayersScores())
-//                    fireGameOver(getPlayersScores())
-//                }
-//            }
+            if (boxDrawn) {
+                if (lines.all{!it.validLine() || it.isDrawn}) {
+                    isFinished = true
+                }
+            }
             fireGameC()
             fireGameChange()
         }
         return boxDrawn
+    }
+
+    fun getBoxOwner(col: Int, row: Int): Player? {
+        return boxes[col, row].owningPlayer
     }
 
     private fun getPlayersScores(): List<Pair<Player, Int>> {
@@ -203,9 +210,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
         return pScore
     }
 
-    fun getBoxOwner(col: Int, row: Int): Player? {
-        return boxes[col, row].owningPlayer
-    }
+
 
     var onGameChangeListener: DotsAndBoxesGame.GameChangeListener? = null
 

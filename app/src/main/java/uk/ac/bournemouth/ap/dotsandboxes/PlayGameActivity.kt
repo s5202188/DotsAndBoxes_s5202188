@@ -5,13 +5,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context;
+import android.content.Intent
+import android.widget.Button
 import org.example.student.dotsboxgame.StudentDotsBoxGame
 
 
 class PlayGameActivity : AppCompatActivity() {
-    var playerName = "Player1"
-
-//    lateinit var mGameView: GameView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,6 +18,17 @@ class PlayGameActivity : AppCompatActivity() {
 
         supportActionBar!!.title = "Dots And Boxes"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        val button = findViewById<Button>(R.id.buttonRestart)
+        button.setOnClickListener {
+            val intent = Intent(this, PlayGameActivity::class.java)
+            startActivity(intent)
+        }
+        val button2 = findViewById<Button>(R.id.buttonSettings)
+        button2.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
 
         /*
         val settings : SharedPreferences = getSharedPreferences("UserSettings", 0)
