@@ -1,6 +1,7 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -53,8 +54,7 @@ class GameView: View {
     private var playerName = "Player1"
     private var compName = "Computer"
 
-    private var players: List<Player> = listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName))
-    var mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, players)
+    var mGame: StudentDotsBoxGame = StudentDotsBoxGame(colCount,rowCount, listOf(StudentDotsBoxGame.User(playerName), StudentDotsBoxGame.PlayerComputer(compName)))
         set(value) {
             field.removeOnGameChangeListener(gameChangeListenerImp)
             field.removeOnGameOverListener(gameOverListenerImp)
@@ -78,9 +78,31 @@ class GameView: View {
         }
     }
 
+//    fun getSettings() {
+//        val sett = SettingsActivity().getSettings()
+//        if (sett.isNotEmpty()) {
+//            playerName = sett[0]
+//            gridRows = sett[1].toInt()
+//            gridColumns = sett[2].toInt()
+//        }
+//    }
+
     init {
         mGame.setGameChangeListener(gameChangeListenerImp)
         mGame.setGameOverListener(gameOverListenerImp)
+
+//        var pName = "Player1"
+//        var row = 3
+//        var col = 3
+//        val settings = SettingsActivity().getSharedPreferences()
+//        val inputPlayerName = settings?.getString("PlayerName", "").toString()
+//        val inputGridRows = settings?.getInt("gridRows", 3).toString().toInt()
+//        val inputGridColumns = settings?.getInt("GridColumns", 3).toString().toInt()
+//        if (inputPlayerName.isNotEmpty()) {
+//            pName = inputPlayerName
+//            row = inputGridRows
+//            col = inputGridColumns
+//        }
 
         dotsPaint = Paint().apply {
             setStyle(Style.FILL)
@@ -121,11 +143,11 @@ class GameView: View {
             setTypeface(Typeface.SANS_SERIF)
         }
         boxPlayerPaint = Paint().apply {
-            style = Paint.Style.FILL
+            style = Style.FILL
             setColor(playerBoxCol)
         }
         boxComputerPaint = Paint().apply {
-            style = Paint.Style.FILL
+            style = Style.FILL
             setColor(computerBoxCol)
         }
     }
@@ -180,7 +202,7 @@ class GameView: View {
         }
 
         // draw players names and scores in their colours
-        canvas.drawText(playerName, canvasWidth/1.85f, canvasHeight * 0.8f, playerWordsPaint)
+        canvas.drawText(playerName, canvasWidth/1.7f, canvasHeight * 0.8f, playerWordsPaint)
         canvas.drawText(mGame.playerScores[0].toString(), canvasWidth/5f, canvasHeight * 0.8f, playerWordsPaint)
 
         canvas.drawText(compName, canvasWidth/1.7f, canvasHeight * 0.88f, computerWordsPaint)

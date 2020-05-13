@@ -1,15 +1,18 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
-
 class SettingsActivity : AppCompatActivity() {
-    var playerName = ""
+
+    var playerName = "Player1"
     var gridColumns = 3
     var gridRows = 3
 
@@ -19,6 +22,7 @@ class SettingsActivity : AppCompatActivity() {
 
         supportActionBar!!.title = "Dots And Boxes"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
     }
 
     fun onSave(view: View) {
@@ -69,4 +73,13 @@ class SettingsActivity : AppCompatActivity() {
         gridColumns = 3
         gridRows = 3
     }
+
+//    fun getSettings(): List<String> {
+//        val settings = getSharedPreferences("UserSettings", 0)
+//        val inputPlayerName = settings.getString("PlayerName", "").toString()
+//        val inputGridRows = settings.getInt("gridRows", 3).toString()
+//        val inputGridColumns = settings.getInt("GridColumns", 3).toString()
+//        return listOf(inputPlayerName, inputGridRows, inputGridColumns)
+//    }
 }
+

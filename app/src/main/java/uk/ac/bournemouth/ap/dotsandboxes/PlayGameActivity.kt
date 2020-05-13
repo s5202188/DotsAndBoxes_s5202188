@@ -1,9 +1,11 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
+import android.content.SharedPreferences
+import android.os.Bundle
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import org.example.student.dotsboxgame.StudentDotsBoxGame
 
 
 class PlayGameActivity : AppCompatActivity() {
@@ -26,22 +28,19 @@ class PlayGameActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        /*
-        val settings : SharedPreferences = getSharedPreferences("UserSettings", 0)
-        val inputPlayerName = settings.getString("PlayerName", "").toString()
-        val inputGridCol = settings.getInt("GridColumns", 3)
-        val inputGridRows = settings.getInt("gridRows", 3)
+//        var pName = "Player1"
+//        var row = 3
+//        var col = 3
+//        val settings: SharedPreferences = getSharedPreferences("UserSettings", 0)
+//        val inputPlayerName = settings.getString("PlayerName", "").toString()
+//        val inputGridRows = settings.getInt("gridRows", 3).toString().toInt()
+//        val inputGridColumns = settings.getInt("GridColumns", 3).toString().toInt()
+//        if (inputPlayerName.isNotEmpty()) {
+//            pName = inputPlayerName
+//            row = inputGridRows
+//            col = inputGridColumns
+//        }
 
-        if (inputPlayerName.trim().isNotEmpty()) {
-            playerName = inputPlayerName
-        } else {
-            playerName = "Player1"
-        }
-
-        mGameView = GameView(this)
-        mGameView.mGame = StudentDotsBoxGame(inputGridCol, inputGridRows, listOf(StudentDotsBoxGame.User("Player1"), StudentDotsBoxGame.PlayerComputer("Computer")))
-        setContentView(mGameView)
-*/
+//        var mGame = StudentDotsBoxGame(row, col, listOf(StudentDotsBoxGame.User("Player 1"), StudentDotsBoxGame.PlayerComputer("Computer 1")))
     }
-
 }

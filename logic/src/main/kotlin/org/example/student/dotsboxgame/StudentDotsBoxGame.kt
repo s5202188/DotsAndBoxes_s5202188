@@ -6,8 +6,8 @@ import uk.ac.bournemouth.ap.dotsandboxeslib.matrix.MutableMatrix
 
 class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : AbstractDotsAndBoxesGame() {
 
-    private val columns: Int = columns
-    private val rows: Int = rows
+    val columns: Int = columns
+    val rows: Int = rows
     private var currentPlayerIndex: Int = 0
 
     var playerScores = mutableListOf<Int>(0, 0, 0 ,0 , 0, 0)
@@ -16,7 +16,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     //TODO("You will need to get players from your constructor")
     //add a parameter to the constructor with type List<Player> (or Iterable<Player>), then you get that from the constructor parameter to set your property (and remember the players)
 
-//    override var currentPlayer: Player = players[currentPlayerIndex]
+    //override var currentPlayer: Player = players[currentPlayerIndex]
     override val currentPlayer: Player
     get() {
         return players[currentPlayerIndex]
@@ -44,16 +44,6 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
             current = currentPlayer
         }
     }
-
-    //old ver
-//    fun play(xCo: Int, yCo: Int) {
-//        if(!lines[xCo,  yCo].isDrawn) {
-//            val boxDrawn = playToken(xCo, yCo)
-//            if (!isFinished && (!boxDrawn && currentPlayer is PlayerComputer)) {
-//                playComputerTurns()
-//            }
-//        }
-//    }
 
     fun play(xCo: Int, yCo: Int) {
         lines[xCo, yCo].drawLine()
