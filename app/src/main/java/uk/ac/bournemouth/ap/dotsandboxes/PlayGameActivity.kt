@@ -1,13 +1,9 @@
 package uk.ac.bournemouth.ap.dotsandboxes
 
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import android.content.Context;
 import android.content.Intent
 import android.widget.Button
-import org.example.student.dotsboxgame.StudentDotsBoxGame
 
 
 class PlayGameActivity : AppCompatActivity() {

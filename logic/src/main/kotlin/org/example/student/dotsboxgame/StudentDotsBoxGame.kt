@@ -10,7 +10,7 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
     private val rows: Int = rows
     private var currentPlayerIndex: Int = 0
 
-    var playerScores = mutableListOf<Int>(0, 0)
+    var playerScores = mutableListOf<Int>(0, 0, 0 ,0 , 0, 0)
 
     override val players: List<Player> = players
     //TODO("You will need to get players from your constructor")
@@ -181,10 +181,10 @@ class StudentDotsBoxGame(columns: Int, rows: Int, players: List<Player>) : Abstr
                 }
             }
             if (!boxDrawn) {
-                if(currentPlayerIndex == 0) {
+                if(currentPlayerIndex < (players.size - 1)) {
                     currentPlayerIndex ++
                 } else {
-                    currentPlayerIndex --
+                    currentPlayerIndex = 0
                 }
             }
             if (boxDrawn) {
